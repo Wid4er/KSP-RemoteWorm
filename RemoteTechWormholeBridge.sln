@@ -1,0 +1,36 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26124.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteTechWormholeBridge.Core", "src/RemoteTechWormholeBridge.Core/RemoteTechWormholeBridge.Core.csproj", "{6A87F08A-C93D-4CFD-A6D0-41839D57C394}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteTechWormholeBridge.Core.Tests", "tests/RemoteTechWormholeBridge.Core.Tests/RemoteTechWormholeBridge.Core.Tests.csproj", "{C053210F-0370-40AE-891A-3B5230069D34}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteTechWormholeBridge", "src/RemoteTechWormholeBridge/RemoteTechWormholeBridge.csproj", "{E806D41B-E14A-4B69-B180-8B39D0DD610C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteTechWormholeBridge.PatchSmokeTests", "tests/RemoteTechWormholeBridge.PatchSmokeTests/RemoteTechWormholeBridge.PatchSmokeTests.csproj", "{F698AA3A-9E48-4780-A8A0-59D3D87714E1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6A87F08A-C93D-4CFD-A6D0-41839D57C394}.Debug|Any CPU.ActiveCfg = Debug|AnyCPU
+		{6A87F08A-C93D-4CFD-A6D0-41839D57C394}.Debug|Any CPU.Build.0 = Debug|AnyCPU
+		{6A87F08A-C93D-4CFD-A6D0-41839D57C394}.Release|Any CPU.ActiveCfg = Release|AnyCPU
+		{6A87F08A-C93D-4CFD-A6D0-41839D57C394}.Release|Any CPU.Build.0 = Release|AnyCPU
+		{C053210F-0370-40AE-891A-3B5230069D34}.Debug|Any CPU.ActiveCfg = Debug|AnyCPU
+		{C053210F-0370-40AE-891A-3B5230069D34}.Debug|Any CPU.Build.0 = Debug|AnyCPU
+		{C053210F-0370-40AE-891A-3B5230069D34}.Release|Any CPU.ActiveCfg = Release|AnyCPU
+		{C053210F-0370-40AE-891A-3B5230069D34}.Release|Any CPU.Build.0 = Release|AnyCPU
+		{E806D41B-E14A-4B69-B180-8B39D0DD610C}.Debug|Any CPU.ActiveCfg = Debug|AnyCPU
+		{E806D41B-E14A-4B69-B180-8B39D0DD610C}.Debug|Any CPU.Build.0 = Debug|AnyCPU
+		{E806D41B-E14A-4B69-B180-8B39D0DD610C}.Release|Any CPU.ActiveCfg = Release|AnyCPU
+		{E806D41B-E14A-4B69-B180-8B39D0DD610C}.Release|Any CPU.Build.0 = Release|AnyCPU
+		{F698AA3A-9E48-4780-A8A0-59D3D87714E1}.Debug|Any CPU.ActiveCfg = Debug|AnyCPU
+		{F698AA3A-9E48-4780-A8A0-59D3D87714E1}.Debug|Any CPU.Build.0 = Debug|AnyCPU
+		{F698AA3A-9E48-4780-A8A0-59D3D87714E1}.Release|Any CPU.ActiveCfg = Release|AnyCPU
+		{F698AA3A-9E48-4780-A8A0-59D3D87714E1}.Release|Any CPU.Build.0 = Release|AnyCPU
+	EndGlobalSection
+EndGlobal

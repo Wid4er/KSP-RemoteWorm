@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F698AA3A-9E48-4780-A8A0-59D3D87714E1}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>RemoteTechWormholeBridge.PatchSmokeTests</RootNamespace>
+    <AssemblyName>RemoteTechWormholeBridge.PatchSmokeTests</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <LangVersion>7.3</LangVersion>
+    <KspRoot Condition=" '$(KspRoot)' == '' ">$(KSP_ROOT)</KspRoot>
+    <KspManagedDir Condition=" Exists('$(KspRoot)/KSP_x64_Data/Managed') ">$(KspRoot)/KSP_x64_Data/Managed</KspManagedDir>
+    <KspManagedDir Condition=" '$(KspManagedDir)' == '' and Exists('$(KspRoot)/KSP_Data/Managed') ">$(KspRoot)/KSP_Data/Managed</KspManagedDir>
+    <KspGameDataDir>$(KspRoot)/GameData</KspGameDataDir>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>../../build/inspection/</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>../../build/inspection/</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(KspManagedDir)/Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(KspManagedDir)/UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="KEX-Wormholes">
+      <HintPath>$(KspGameDataDir)/KopernicusExpansion/Plugins/KEX-Wormholes.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="RemoteTech">
+      <HintPath>$(KspGameDataDir)/RemoteTech/Plugins/RemoteTech.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(KspGameDataDir)/000_Harmony/0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <ProjectReference Include="../../src/RemoteTechWormholeBridge/RemoteTechWormholeBridge.csproj">
+      <Project>{E806D41B-E14A-4B69-B180-8B39D0DD610C}</Project>
+      <Name>RemoteTechWormholeBridge</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)/Microsoft.CSharp.targets" />
+</Project>

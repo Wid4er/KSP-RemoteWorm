@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6A87F08A-C93D-4CFD-A6D0-41839D57C394}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>RemoteTechWormholeBridge.Core</RootNamespace>
+    <AssemblyName>RemoteTechWormholeBridge.Core</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>../../build/inspection/</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>../../build/inspection/</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="RegistryIssue.cs" />
+    <Compile Include="Wormholes/WormholeBodyDescriptor.cs" />
+    <Compile Include="Wormholes/WormholePairDescriptor.cs" />
+    <Compile Include="Wormholes/WormholeRegistry.cs" />
+    <Compile Include="Endpoints/BridgeOperationalBand.cs" />
+    <Compile Include="Endpoints/EndpointDescriptor.cs" />
+    <Compile Include="Endpoints/EndpointFailureReason.cs" />
+    <Compile Include="Endpoints/EndpointRegistry.cs" />
+    <Compile Include="Geometry/KspCoordinateFrames.cs" />
+    <Compile Include="Geometry/Vector3Value.cs" />
+    <Compile Include="Geometry/WormholeConeCoverage.cs" />
+    <Compile Include="Routing/BridgeRouteVisibility.cs" />
+    <Compile Include="Properties/AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)/Microsoft.CSharp.targets" />
+</Project>
