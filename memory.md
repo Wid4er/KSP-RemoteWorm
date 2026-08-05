@@ -132,6 +132,24 @@ Actualizado: 2026-08-04.
   afectar al otro puente activo ni generar excepciones RTWB. RemoteTech pone
   `Dish=0` en ese estado. Corregida la prioridad diagnóstica para informar
   `Inactive`/`Unpowered` antes de `NotDirectional`, con prueba de regresión.
+- Validado docking dentro de KSP: RemoteTech fusionó el GUID de la nave auxiliar
+  con el relé superviviente y RTWB reescaneó el endpoint en aproximadamente un
+  segundo, sin aristas obsoletas ni excepciones RTWB. El usuario confirmó que el
+  undocking ya funcionaba correctamente.
+- Validada destrucción desde Tracking Station: al eliminar `Bujero Docking`, los
+  endpoints aceptados bajaron de tres a dos y las parejas activas de dos a una;
+  el puente restante continuó operativo y no hubo excepciones RTWB.
+- Confirmado el modelo multirrelé: RTWB publica todas las aristas compatibles y
+  RemoteTech escoge la ruta completa por coste para cada origen. Los canales son
+  una partición manual opcional y no se expondrán en la interfaz mientras no
+  exista una necesidad de juego concreta.
+- El propietario del proyecto autorizó el 2026-08-05 distribuir RTWB bajo GNU
+  GPL v3.0 only. Preparada la versión `0.5.0-beta.1`; las DLL de terceros siguen
+  siendo dependencias externas y no forman parte del paquete.
+- `0.5.0-beta.1` compila Release con cero avisos y errores; pasan las pruebas
+  core, el smoke test de Harmony y `pedump`. El ZIP instalable contiene solo
+  archivos propios y su SHA-256 es
+  `d7e9d4cfc6771bef97b6822e165a5ef7f19e413b70050e2c114df392ab7e29c7`.
 
 ## Decisiones vigentes
 
@@ -146,10 +164,9 @@ Actualizado: 2026-08-04.
 
 ## Siguiente trabajo
 
-1. Completar MVP 7 con docking/undocking, destrucción y múltiples canales; la
-   instalación actual solo contiene una pareja KEX para probar.
-2. Antes de distribuir, cerrar metadatos de release y revisar compatibilidad de
-   licencias KEX GPL-3.0 / RemoteTech GPL-2.0.
+1. Publicar el commit de `0.5.0-beta.1`.
+2. Con autorización explícita, crear la primera release beta con su ZIP
+   instalable.
 
 ## Bloqueos/riesgos
 
@@ -157,5 +174,5 @@ Actualizado: 2026-08-04.
   pueden referenciarse mediante una propiedad de build sin copiarlas al paquete.
 - El soporte descargado depende de la firma interna `ProtoAntenna.mProtoPart`;
   el smoke test la verifica y el runtime degrada omitiendo solo esos endpoints.
-- KEX GPL-3.0 y RemoteTech GPL-2.0 pueden plantear incompatibilidad de licencia
-  para un plugin que enlace ambos; revisar antes de distribuir.
+- La autorización GPLv3 del proyecto queda registrada, pero RTWB sigue
+  dependiendo de APIs de terceros y debe respetar sus avisos y condiciones.

@@ -1,12 +1,12 @@
 {
   "NAME": "RemoteTech Wormhole Bridge",
-  "URL": "",
-  "DOWNLOAD": "",
+  "URL": "https://raw.githubusercontent.com/Wid4er/KSP-RemoteWorm/main/packaging/GameData/RemoteTechWormholeBridge/RemoteTechWormholeBridge.version",
+  "DOWNLOAD": "https://github.com/Wid4er/KSP-RemoteWorm/releases",
   "VERSION": {
     "MAJOR": 0,
-    "MINOR": 4,
+    "MINOR": 5,
     "PATCH": 0,
-    "BUILD": 0
+    "BUILD": 1
   },
   "KSP_VERSION_MIN": {
     "MAJOR": 1,

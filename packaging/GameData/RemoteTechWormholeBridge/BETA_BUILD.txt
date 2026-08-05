@@ -1,9 +1,9 @@
-RemoteTech Wormhole Bridge 0.4.0 render test build
+RemoteTech Wormhole Bridge 0.5.0 beta 1
 
 Operational relay band: 100-300 km from the transition surface.
 Map visuals: magenta #FF4FD8; outgoing cone length: 300 km.
 
-This build mutates RemoteTech's logical graph when a validated bidirectional
+This beta mutates RemoteTech's logical graph when a validated bidirectional
 wormhole pair is active. It does not emit RemoteTech renderer events and does
 not draw an interstellar wormhole line. Its own renderer draws the two local
 segments of active bridges and the projected cones of every accepted endpoint
@@ -15,7 +15,7 @@ the exact orbital state around a KEX jump, and validates bidirectional dish
 coverage through paired mouths. Active pairs are inserted into RemoteTech with
 an effective local path cost.
 
-Required for this test build:
+Required:
 - Kerbal Space Program 1.12.5
 - RemoteTech
 - Kopernicus Expansion Continued (KEX-Wormholes)
@@ -23,3 +23,6 @@ Required for this test build:
 - ModuleManager
 
 WormholeSignalBridge is not required.
+
+License: GNU General Public License v3.0 only.
+Source: https://github.com/Wid4er/KSP-RemoteWorm

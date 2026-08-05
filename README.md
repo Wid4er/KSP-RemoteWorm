@@ -1,9 +1,9 @@
 # RemoteTech Wormhole Bridge (RTWB)
 
-Estado actual: **MVP 5/6 de renderizado en pruebas**.
+Estado actual: **0.5.0-beta.1; puente funcional validado en KSP 1.12.5**.
 
 Este repositorio contiene la documentación verificada de KEX, RemoteTech y
-WormholeSignalBridge, el núcleo de dominio y una DLL instalable de diagnóstico.
+WormholeSignalBridge, el núcleo de dominio y una DLL instalable en fase beta.
 La DLL descubre parejas KEX y endpoints RemoteTech cargados o descargados,
 calcula puntos de transición, valida cobertura direccional bidireccional e
 inyecta una arista dirigida por sentido en el grafo de RemoteTech. La
@@ -21,7 +21,9 @@ enlaces activos.
 
 El descubrimiento, la inyección de red y el renderer funcionan tanto en vuelo
 como en Tracking Station. Los cambios de objetivo realizados desde la interfaz
-de antenas de RemoteTech se reflejan durante el refresco periódico.
+de antenas de RemoteTech se reflejan durante el refresco periódico. Docking,
+undocking, destrucción de naves y pérdida de energía reconstruyen o retiran las
+aristas sin conservar enlaces obsoletos.
 
 La regla del proyecto es deliberada: WormholeSignalBridge es una referencia de
 arquitectura y descubrimiento, no una capa de RemoteTech ni la fuente de verdad
@@ -53,3 +55,8 @@ Véase [docs/runtime-test.md](docs/runtime-test.md) para el procedimiento exacto
 
 WormholeSignalBridge no es una dependencia y puede permanecer instalado para
 una prueba de coexistencia.
+
+## Licencia
+
+RTWB se distribuye bajo [GNU GPL v3.0 only](LICENSE). Las DLL de KSP, RemoteTech,
+KEX y Harmony son dependencias externas y no se redistribuyen con este proyecto.

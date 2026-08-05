@@ -10,7 +10,7 @@
 | WormholeSignalBridge 2.0.0 | referencia inspeccionada; no es dependencia de RTWB |
 | ModuleManager 4.2.3 | DLL verificada |
 | Singularity 0.994.9632.26920 | irrelevante para lógica; solo visual del agujero |
-| Harmony | DLL instalada `2.2.1.0`; parche diagnóstico validado fuera de Unity |
+| Harmony | DLL instalada `2.2.1.0`; parches validados fuera de Unity y dentro de KSP |
 
 RemoteTech 1.9.12 declara compatibilidad hasta KSP 1.12.1 en su `.version`, aunque
 el proyecto objetivo usa KSP 1.12.5. Esto es un riesgo de metadatos/soporte que
@@ -46,8 +46,9 @@ su configuración original.
 5. Activación, energía y cambio de objetivo.
 6. Ruta y retardo con/sin enlace.
 7. Ausencia de línea interestelar.
-8. Time warp, docking, undocking y recarga de partida.
+8. Time warp, docking, undocking, destrucción y recarga de partida.
 
-La compilación diagnóstica enlaza dinámicamente RemoteTech y KEX para uso local.
-No debe publicarse hasta resolver la compatibilidad de licencias GPL-2.0-only y
-GPL-3.0 del conjunto o acordar una arquitectura autorizada por los proyectos.
+RTWB se distribuye bajo GNU GPL v3.0 only con autorización del propietario del
+proyecto confirmada el 2026-08-05. RemoteTech, KEX, Harmony y las DLL de KSP son
+dependencias externas: se referencian durante la compilación y no se incluyen en
+el paquete. WormholeSignalBridge no es una dependencia.

@@ -134,6 +134,9 @@
     <Copy SourceFiles="@(PackageFile)"
           DestinationFiles="@(PackageFile->'../../build/GameData/%(RecursiveDir)%(Filename)%(Extension)')"
           SkipUnchangedFiles="true" />
+    <Copy SourceFiles="../../LICENSE"
+          DestinationFiles="$(PackageOutputDir)/LICENSE.txt"
+          SkipUnchangedFiles="true" />
   </Target>
 
   <Import Project="$(MSBuildToolsPath)/Microsoft.CSharp.targets" />

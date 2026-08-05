@@ -75,6 +75,6 @@ Versiones de assembly comprobadas:
 - Kopernicus `1.0.247.0`;
 - Harmony `2.2.1.0`.
 
-El bloqueo de referencias y la transformación radial quedan resueltos. El
-siguiente límite es validar la cobertura dentro de Unity/KSP antes de habilitar
-la inyección de enlaces.
+El bloqueo de referencias, la transformación radial, la cobertura, la inyección
+de enlaces y el renderizado quedaron validados dentro de Unity/KSP. El paquete
+beta incluye el texto completo de GPLv3, pero no incluye DLL de terceros.
