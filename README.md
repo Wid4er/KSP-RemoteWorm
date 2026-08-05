@@ -110,3 +110,8 @@ documented under [docs/](docs/).
 RTWB is licensed under [GNU GPL v3.0 only](LICENSE). KSP, RemoteTech, KEX, and
 Harmony DLLs are external dependencies and are not redistributed with this
 project.
+
+## Acknowledgements
+
+This mod was created with the assistance of OpenAI Codex, which contributed to
+its development, debugging, and documentation.
