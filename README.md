@@ -39,8 +39,9 @@ You need:
 - **HarmonyKSP**;
 - **ModuleManager**.
 
-**WormholeSignalBridge is not a dependency.** It can coexist with RTWB, but it
-targets CommNet/RealAntennas and does not participate in the RemoteTech network.
+**WormholeSignalBridge is not a dependency.** RTWB was inspired by its approach
+to sending signals through KEX wormholes, adapted specifically for RemoteTech
+instead of CommNet/RealAntennas.
 
 ## Download and installation
 
