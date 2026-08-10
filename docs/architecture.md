@@ -43,6 +43,8 @@ El núcleo ya valida:
 - existencia del compañero;
 - reciprocidad A↔B;
 - parámetros de altura finitos y ordenados;
+- SOI finita y mayor que la superficie de transición;
+- banda operacional no degenerada completamente contenida en la SOI;
 - deduplicación determinista de parejas.
 
 No se acepta silenciosamente A→B si B no apunta a A.
@@ -69,6 +71,11 @@ La clave del endpoint combina GUID de nave y `flightID` de pieza; el GUID de
 
 ## Fuente única de verdad
 
+Cada `WormholeBodyDescriptor` contiene su `BridgeOperationalBand`, calculada a
+partir de `sphereOfInfluence` y de la superficie de transición. Validación de
+endpoints, logging, conos y anillos consumen esa misma instancia; no existen
+constantes globales de distancia usadas directamente por esos subsistemas.
+
 El registro runtime `RuntimeBridgeLink` almacena extremos y distancia efectiva a
 través de sus endpoints. La telemetría conserva puntos de entrada/salida,
 radiales, semianchos, errores angulares, distancias locales, canal y estado. El
@@ -85,7 +92,7 @@ inyector consume el registro validado y no recalcula geometría.
 5. Los parches de coste convierten A* en Dijkstra durante `FindPath` y aplican la
    distancia efectiva a la arista especial.
 6. RemoteTech publica sus rutas y retardo normales.
-7. Tras verificar el enlace lógico, el renderer propio dibuja dos tramos y conos.
+7. El renderer propio dibuja tramos, conos y anillos de guía orbital.
 
 ## Degradación segura
 
@@ -99,8 +106,5 @@ inyector consume el registro validado y no recalcula geometría.
 
 ## Decisiones aplazadas
 
-- fórmula final del margen de seguridad;
-- licencia de distribución;
 - UI y persistencia de ajustes globales;
-- renderizado 2D/3D;
 - propuesta de API upstream para RemoteTech.

@@ -10,8 +10,13 @@ namespace RemoteTechWormholeBridge
     internal sealed class WormholeRenderManager : MonoBehaviour
     {
         private const float LineWidth = 3f;
+        private const float GuideLineWidth = 2f;
+        private const int GuideRingSegments = 64;
         private static readonly Color BridgeColor = new Color(1f, 79f / 255f, 216f / 255f, 1f);
         private static readonly Color ConeColor = new Color(1f, 79f / 255f, 216f / 255f, 0.7f);
+        private static readonly Color GuideColor = new Color(1f, 48f / 255f, 48f / 255f, 0.8f);
+        private static readonly double[] GuideRingCosines = BuildRingCoordinates(false);
+        private static readonly double[] GuideRingSines = BuildRingCoordinates(true);
 
         private static WormholeRenderManager instance;
         private readonly List<MapLineMesh> linePool = new List<MapLineMesh>();
@@ -30,11 +35,9 @@ namespace RemoteTechWormholeBridge
                 return;
 
             instance = MapView.MapCamera.gameObject.AddComponent<WormholeRenderManager>();
-            Log.Info("renderer-attached color=#FF4FD8 operationalBand=" +
-                     RemoteTechEndpointScanner.Format(BridgeOperationalBand.MinimumLocalDistance) +
-                     "-" + RemoteTechEndpointScanner.Format(BridgeOperationalBand.MaximumLocalDistance) +
-                     " coneLength=" +
-                     RemoteTechEndpointScanner.Format(BridgeOperationalBand.MaximumLocalDistance) +
+            Log.Info("renderer-attached bridgeColor=#FF4FD8 guideColor=#FF3030" +
+                     " operationalBand=per-wormhole" +
+                     " coneLength=per-wormhole guideRings=true" +
                      " visibility=selected-wormhole-pair-route");
         }
 
@@ -94,9 +97,12 @@ namespace RemoteTechWormholeBridge
             int used = 0;
             int visibleLinks = 0;
             int visibleConeEndpoints = 0;
+            int visibleGuideRings = 0;
             bool visibleFromRoute = false;
             bool renderedSegments = false;
             bool renderedCones = false;
+            bool renderedGuideRings = false;
+            string guideBody = "<none>";
             foreach (RuntimeBridgeLink link in WormholeNetworkIntegration.SnapshotVisualLinks())
             {
                 bool endpointSelected = IsEndpointSelected(link, focused);
@@ -152,14 +158,27 @@ namespace RemoteTechWormholeBridge
                         !TryGeometry(endpoint, out outputRadial, out relay, out transitionPoint))
                         continue;
 
-                    DrawOutgoingCone(ref used, endpoint, partner, outputRadial);
-                    ++visibleConeEndpoints;
-                    renderedCones = true;
+                    if (DrawOutgoingCone(ref used, endpoint, partner, outputRadial))
+                    {
+                        ++visibleConeEndpoints;
+                        renderedCones = true;
+                    }
                 }
             }
 
+            RuntimeEndpoint guideEndpoint = showCones
+                ? SelectGuideEndpoint(focused, selectedRouteVessel)
+                : null;
+            if (guideEndpoint != null && DrawGuideRings(ref used, guideEndpoint))
+            {
+                visibleGuideRings = 2;
+                renderedGuideRings = true;
+                guideBody = guideEndpoint.Wormhole.Body.name;
+            }
+
             HideUnused(used);
-            if (!loggedVisible && (visibleLinks > 0 || visibleConeEndpoints > 0) && used > 0)
+            if (!loggedVisible &&
+                (visibleLinks > 0 || visibleConeEndpoints > 0 || visibleGuideRings > 0) && used > 0)
             {
                 loggedVisible = true;
                 Log.Info("renderer-visible links=" + visibleLinks +
@@ -167,26 +186,27 @@ namespace RemoteTechWormholeBridge
                          " meshes=" + used +
                          " segments=" + renderedSegments +
                          " cones=" + renderedCones +
+                         " guideRings=" + renderedGuideRings +
+                         " guideBody=" + guideBody +
                          " selection=" + (visibleFromRoute ? "route" : "endpoint") +
                          " selected=" + SelectedName(focused, selectedRouteVessel) +
-                         " coneLength=" +
-                         RemoteTechEndpointScanner.Format(BridgeOperationalBand.MaximumLocalDistance));
+                         " coneLength=per-wormhole");
             }
         }
 
-        private void DrawOutgoingCone(
+        private bool DrawOutgoingCone(
             ref int used,
             RuntimeEndpoint source,
             KexBodyInfo destination,
             Vector3d outputRadial)
         {
             if (source == null || destination == null || destination.Body == null ||
-                source.Antenna == null)
-                return;
+                destination.OperationalBand == null || source.Antenna == null)
+                return false;
 
             Vector3d direction = outputRadial.normalized;
             if (!IsFinite(direction) || direction.sqrMagnitude <= 0)
-                return;
+                return false;
 
             Vector3d origin = destination.Body.position +
                               direction * destination.TransitionRadius;
@@ -194,13 +214,102 @@ namespace RemoteTechWormholeBridge
             double halfAngle = Math.Acos(cosine);
             Vector3d perpendicular = ConePerpendicular(destination.Body, direction);
             if (perpendicular.sqrMagnitude <= 0)
-                return;
+                return false;
 
-            double length = BridgeOperationalBand.MaximumLocalDistance;
+            double length = destination.OperationalBand.MaximumLocalDistance;
             Vector3d axial = direction * length;
             Vector3d lateral = perpendicular * (Math.Tan(halfAngle) * length);
             DrawLine(ref used, origin, origin + axial + lateral, ConeColor);
             DrawLine(ref used, origin, origin + axial - lateral, ConeColor);
+            return true;
+        }
+
+        private bool DrawGuideRings(ref int used, RuntimeEndpoint endpoint)
+        {
+            if (endpoint == null || endpoint.Vessel == null || endpoint.Wormhole == null ||
+                endpoint.Wormhole.Body == null || endpoint.Wormhole.OperationalBand == null)
+                return false;
+
+            Vector3d basisX;
+            Vector3d basisY;
+            if (!TryRingBasis(endpoint, out basisX, out basisY))
+                return false;
+
+            BridgeOperationalBand band = endpoint.Wormhole.OperationalBand;
+            DrawGuideRing(ref used, endpoint.Wormhole.Body.position, basisX, basisY, band.InnerRadius);
+            DrawGuideRing(ref used, endpoint.Wormhole.Body.position, basisX, basisY, band.OuterRadius);
+            return true;
+        }
+
+        private void DrawGuideRing(
+            ref int used,
+            Vector3d center,
+            Vector3d basisX,
+            Vector3d basisY,
+            double radius)
+        {
+            if (!IsFinite(radius) || radius <= 0)
+                return;
+
+            Vector3d previous = center + basisX * radius;
+            for (int index = 1; index <= GuideRingSegments; ++index)
+            {
+                Vector3d current = center +
+                                   (basisX * GuideRingCosines[index] +
+                                    basisY * GuideRingSines[index]) * radius;
+                DrawLine(ref used, previous, current, GuideColor, GuideLineWidth);
+                previous = current;
+            }
+        }
+
+        private static bool TryRingBasis(
+            RuntimeEndpoint endpoint,
+            out Vector3d basisX,
+            out Vector3d basisY)
+        {
+            basisX = Vector3d.zero;
+            basisY = Vector3d.zero;
+            Vessel vessel = endpoint.Vessel;
+            CelestialBody body = endpoint.Wormhole.Body;
+            if (vessel.orbit != null && vessel.orbit.referenceBody == body)
+            {
+                double universalTime = Planetarium.GetUniversalTime();
+                Vector3d orbitalPosition = vessel.orbit.getRelativePositionAtUT(universalTime);
+                Vector3d orbitalVelocity = vessel.orbit.getOrbitalVelocityAtUT(universalTime);
+                Vector3d orbitalNormal = Vector3d.Cross(orbitalPosition, orbitalVelocity);
+                Vector3d worldPosition = OrbitalToWorld(orbitalPosition).normalized;
+                Vector3d worldNormal = OrbitalToWorld(orbitalNormal).normalized;
+                Vector3d worldTangent = Vector3d.Cross(worldNormal, worldPosition).normalized;
+                if (IsFinite(worldPosition) && IsFinite(worldNormal) && IsFinite(worldTangent) &&
+                    worldPosition.sqrMagnitude > 0 && worldNormal.sqrMagnitude > 0 &&
+                    worldTangent.sqrMagnitude > 0)
+                {
+                    basisX = worldPosition;
+                    basisY = worldTangent;
+                    return true;
+                }
+            }
+
+            Vector3d normal = body.transform == null
+                ? Vector3d.up
+                : ((Vector3d)body.transform.up).normalized;
+            if (!IsFinite(normal) || normal.sqrMagnitude <= 0)
+                normal = Vector3d.up;
+
+            Vector3d reference = Math.Abs(Vector3d.Dot(normal, Vector3d.up)) < 0.9
+                ? Vector3d.up
+                : Vector3d.forward;
+            basisX = Vector3d.Cross(normal, reference).normalized;
+            basisY = Vector3d.Cross(normal, basisX).normalized;
+            return IsFinite(basisX) && IsFinite(basisY) &&
+                   basisX.sqrMagnitude > 0 && basisY.sqrMagnitude > 0;
+        }
+
+        private static Vector3d OrbitalToWorld(Vector3d orbital)
+        {
+            Vector3Value world = KspCoordinateFrames.OrbitalToWorld(
+                new Vector3Value(orbital.x, orbital.y, orbital.z));
+            return new Vector3d(world.X, world.Y, world.Z);
         }
 
         private static Vector3d ConePerpendicular(CelestialBody body, Vector3d direction)
@@ -216,12 +325,34 @@ namespace RemoteTechWormholeBridge
             return perpendicular.normalized;
         }
 
+        private static double[] BuildRingCoordinates(bool sine)
+        {
+            var values = new double[GuideRingSegments + 1];
+            for (int index = 0; index <= GuideRingSegments; ++index)
+            {
+                double angle = index * Math.PI * 2.0 / GuideRingSegments;
+                values[index] = sine ? Math.Sin(angle) : Math.Cos(angle);
+            }
+
+            return values;
+        }
+
         private void DrawLine(ref int used, Vector3d start, Vector3d end, Color color)
+        {
+            DrawLine(ref used, start, end, color, LineWidth);
+        }
+
+        private void DrawLine(
+            ref int used,
+            Vector3d start,
+            Vector3d end,
+            Color color,
+            float width)
         {
             if (used == linePool.Count)
                 linePool.Add(new MapLineMesh("RTWBMapLine"));
 
-            linePool[used].Update(start, end, color, LineWidth);
+            linePool[used].Update(start, end, color, width);
             ++used;
         }
 
@@ -282,6 +413,33 @@ namespace RemoteTechWormholeBridge
             return null;
         }
 
+        private static RuntimeEndpoint SelectGuideEndpoint(Vessel focused, Vessel routeVessel)
+        {
+            IReadOnlyList<RuntimeEndpoint> guides = RemoteTechEndpointScanner.Guides;
+            RuntimeEndpoint focusedGuide = FindGuideForVessel(guides, focused);
+            if (focusedGuide != null)
+                return focusedGuide;
+
+            return FindGuideForVessel(guides, routeVessel);
+        }
+
+        private static RuntimeEndpoint FindGuideForVessel(
+            IReadOnlyList<RuntimeEndpoint> guides,
+            Vessel vessel)
+        {
+            if (guides == null || vessel == null)
+                return null;
+
+            for (int index = 0; index < guides.Count; ++index)
+            {
+                RuntimeEndpoint endpoint = guides[index];
+                if (endpoint != null && endpoint.Vessel == vessel)
+                    return endpoint;
+            }
+
+            return null;
+        }
+
         private static bool IsInWormholePair(
             RuntimeEndpoint endpoint,
             RuntimeEndpoint ownerEndpoint,
@@ -308,6 +466,11 @@ namespace RemoteTechWormholeBridge
             return !Double.IsNaN(value.x) && !Double.IsInfinity(value.x) &&
                    !Double.IsNaN(value.y) && !Double.IsInfinity(value.y) &&
                    !Double.IsNaN(value.z) && !Double.IsInfinity(value.z);
+        }
+
+        private static bool IsFinite(double value)
+        {
+            return !Double.IsNaN(value) && !Double.IsInfinity(value);
         }
 
         private void OnDestroy()

@@ -18,7 +18,12 @@ namespace RemoteTechWormholeBridge.Core.Tests
                 FiltersEndpointsAndChannels();
                 PrioritizesOperationalStateWhenDishRangeIsZero();
                 KeepsAntennasOnOneVesselDistinct();
-                AppliesInclusiveOperationalDistanceBand();
+                ComputesLargeOperationalBand();
+                ComputesMediumOperationalBand();
+                ComputesSmallOperationalBand();
+                AppliesFiveKilometreSafetyFloor();
+                RejectsInvalidOperationalBands();
+                AppliesPerWormholeOperationalDistanceBand();
                 ConvertsOrbitalCoordinatesToKspWorldCoordinates();
                 FindsAConcreteBridgeInsideASelectedVesselRoute();
                 ComputesIdentityCoverageInBothDirections();
@@ -109,17 +114,91 @@ namespace RemoteTechWormholeBridge.Core.Tests
             Assert(registry.Rejected.ContainsKey(second.Key), "invalid sibling antenna must remain rejected");
         }
 
-        private static void AppliesInclusiveOperationalDistanceBand()
+        private static void ComputesLargeOperationalBand()
         {
-            Assert(!BridgeOperationalBand.Contains(99999.999),
+            BridgeOperationalBand band = Band(45000, 5000000);
+            AssertClose(band.AvailableSpace, 4955000, 0.001,
+                "large SOI available space must start at the transition radius");
+            AssertClose(band.MinimumLocalDistance, 100000, 0.001,
+                "a large SOI must naturally retain the 100 km inner limit");
+            AssertClose(band.MaximumLocalDistance, 300000, 0.001,
+                "a large SOI must cap the outer limit at 300 km");
+            AssertClose(band.InnerRadius, 145000, 0.001,
+                "the inner guide radius must include the transition radius");
+            AssertClose(band.OuterRadius, 345000, 0.001,
+                "the outer guide radius must include the transition radius");
+        }
+
+        private static void ComputesMediumOperationalBand()
+        {
+            BridgeOperationalBand band = Band(45000, 272000);
+            AssertClose(band.AvailableSpace, 227000, 0.001,
+                "medium SOI available space must be computed from the transition radius");
+            AssertClose(band.MaximumLocalDistance, 181600, 0.001,
+                "medium SOI outer limit must reserve twenty percent of the available space");
+            AssertClose(band.MinimumLocalDistance, 181600.0 / 3.0, 0.001,
+                "medium SOI inner limit must shrink proportionally");
+            Assert(band.OuterRadius < band.SphereOfInfluence,
+                "medium SOI outer guide must remain inside the SOI");
+        }
+
+        private static void ComputesSmallOperationalBand()
+        {
+            BridgeOperationalBand band = Band(45000, 80000);
+            AssertClose(band.AvailableSpace, 35000, 0.001,
+                "small SOI available space must match the Promised Worlds geometry");
+            AssertClose(band.MaximumLocalDistance, 28000, 0.001,
+                "small SOI outer limit must reserve twenty percent of the available space");
+            AssertClose(band.MinimumLocalDistance, 28000.0 / 3.0, 0.001,
+                "small SOI inner limit must remain proportional and above the five km floor");
+            AssertClose(band.InnerRadius, 45000 + 28000.0 / 3.0, 0.001,
+                "small SOI inner guide must be measured from the body center");
+            AssertClose(band.OuterRadius, 73000, 0.001,
+                "small SOI outer guide must leave seven km before the SOI boundary");
+        }
+
+        private static void AppliesFiveKilometreSafetyFloor()
+        {
+            BridgeOperationalBand band = Band(45000, 52000);
+            AssertClose(band.MaximumLocalDistance, 5600, 0.001,
+                "a very small valid SOI must still reserve twenty percent outside");
+            AssertClose(band.MinimumLocalDistance, 5000, 0.001,
+                "the inner limit must never fall below the five km safety floor");
+        }
+
+        private static void RejectsInvalidOperationalBands()
+        {
+            BridgeOperationalBand ignored;
+            Assert(!BridgeOperationalBand.TryCreate(45000, 45000, out ignored),
+                "SOI equal to the transition radius must be rejected");
+            Assert(!BridgeOperationalBand.TryCreate(45000, 44000, out ignored),
+                "SOI below the transition radius must be rejected");
+            Assert(!BridgeOperationalBand.TryCreate(Double.NaN, 80000, out ignored),
+                "NaN transition radius must be rejected");
+            Assert(!BridgeOperationalBand.TryCreate(45000, Double.NaN, out ignored),
+                "NaN SOI must be rejected");
+            Assert(!BridgeOperationalBand.TryCreate(45000, Double.PositiveInfinity, out ignored),
+                "infinite SOI must be rejected");
+            Assert(!BridgeOperationalBand.TryCreate(-1, 80000, out ignored),
+                "negative transition radius must be rejected");
+            Assert(!BridgeOperationalBand.TryCreate(45000, -1, out ignored),
+                "negative SOI must be rejected");
+            Assert(!BridgeOperationalBand.TryCreate(45000, 50000, out ignored),
+                "a band whose five km floor reaches its maximum must be rejected as degenerate");
+        }
+
+        private static void AppliesPerWormholeOperationalDistanceBand()
+        {
+            BridgeOperationalBand band = Band(45000, 5000000);
+            Assert(!band.Contains(99999.999),
                 "a relay below 100 km must be too close");
-            Assert(BridgeOperationalBand.Contains(100000),
+            Assert(band.Contains(100000),
                 "the 100 km boundary must be eligible");
-            Assert(BridgeOperationalBand.Contains(300000),
+            Assert(band.Contains(300000),
                 "the 300 km boundary must be eligible");
-            Assert(!BridgeOperationalBand.Contains(300000.001),
+            Assert(!band.Contains(300000.001),
                 "a relay above 300 km must be too far");
-            Assert(!BridgeOperationalBand.Contains(Double.NaN),
+            Assert(!band.Contains(Double.NaN),
                 "an invalid distance must not be eligible");
 
             EndpointDescriptor tooClose = Endpoint("near", "part", 0);
@@ -130,6 +209,11 @@ namespace RemoteTechWormholeBridge.Core.Tests
                 "the registry must report the lower-band failure");
             Assert(EndpointRegistry.Validate(tooFar) == EndpointFailureReason.TooFarFromWormhole,
                 "the registry must report the upper-band failure");
+
+            EndpointDescriptor missingBand = Endpoint("missing-band", "part", 0);
+            missingBand.OperationalBand = null;
+            Assert(EndpointRegistry.Validate(missingBand) == EndpointFailureReason.UnsafeRegion,
+                "a wormhole without a valid per-body band must be rejected safely");
         }
 
         private static void ConvertsOrbitalCoordinatesToKspWorldCoordinates()
@@ -201,7 +285,7 @@ namespace RemoteTechWormholeBridge.Core.Tests
 
         private static WormholeBodyDescriptor Body(string id, string partner)
         {
-            return new WormholeBodyDescriptor(id, partner, 10000, 35000, 10, 30000);
+            return new WormholeBodyDescriptor(id, partner, 10000, 5000000, 35000, 10, 30000);
         }
 
         private static EndpointDescriptor Endpoint(string vessel, string antenna, int channel)
@@ -216,8 +300,23 @@ namespace RemoteTechWormholeBridge.Core.Tests
                 BridgeCapabilityEnabled = true,
                 IsInOperationalRegion = true,
                 LocalDistance = 200000,
+                OperationalBand = Band(45000, 5000000),
                 HasLocalRange = true
             };
+        }
+
+        private static BridgeOperationalBand Band(double transitionRadius, double sphereOfInfluence)
+        {
+            BridgeOperationalBand band;
+            Assert(BridgeOperationalBand.TryCreate(transitionRadius, sphereOfInfluence, out band),
+                "test geometry must produce a valid operational band");
+            return band;
+        }
+
+        private static void AssertClose(double actual, double expected, double tolerance, string message)
+        {
+            Assert(Math.Abs(actual - expected) <= tolerance,
+                message + " expected=" + expected + " actual=" + actual);
         }
 
         private static void Assert(bool condition, string message)

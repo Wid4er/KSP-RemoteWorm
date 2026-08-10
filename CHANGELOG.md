@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Calcula una banda operacional independiente para cada agujero a partir de su
+  superficie de transición y su SOI, reservando un 20 % de margen exterior.
+- Comprime proporcionalmente la banda en SOI pequeñas sin modificar datos de
+  otros mods.
+- Limita cada cono al máximo local de su agujero de salida.
+- Añade dos anillos rojos que muestran los límites válidos en el plano orbital
+  de la nave seleccionada.
+
 ## 0.5.0-beta.1 - 2026-08-05
 
 - Integra enlaces bidireccionales de agujero en el grafo de RemoteTech.

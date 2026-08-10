@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using KopernicusExpansion.Wormholes;
+using RemoteTechWormholeBridge.Core.Endpoints;
 using RemoteTechWormholeBridge.Core.Wormholes;
 
 namespace RemoteTechWormholeBridge
@@ -9,10 +10,16 @@ namespace RemoteTechWormholeBridge
     {
         internal CelestialBody Body;
         internal WormholeComponent Component;
+        internal WormholeBodyDescriptor Descriptor;
 
         internal double TransitionRadius
         {
-            get { return Body.Radius + Component.influenceAltitude; }
+            get { return Descriptor == null ? Double.NaN : Descriptor.SafetySurfaceRadius; }
+        }
+
+        internal BridgeOperationalBand OperationalBand
+        {
+            get { return Descriptor == null ? null : Descriptor.OperationalBand; }
         }
     }
 
@@ -51,19 +58,29 @@ namespace RemoteTechWormholeBridge
                     String.Equals(candidate.transform.name, component.partnerBody, StringComparison.Ordinal));
                 string partnerId = partner == null ? component.partnerBody : partner.name;
 
-                Bodies[body.name] = new KexBodyInfo { Body = body, Component = component };
-                descriptors.Add(new WormholeBodyDescriptor(
+                var descriptor = new WormholeBodyDescriptor(
                     body.name,
                     partnerId,
                     body.Radius,
+                    body.sphereOfInfluence,
                     component.influenceAltitude,
                     component.jumpMinAltitude,
-                    component.jumpMaxAltitude));
+                    component.jumpMaxAltitude);
+                Bodies[body.name] = new KexBodyInfo
+                {
+                    Body = body,
+                    Component = component,
+                    Descriptor = descriptor
+                };
+                descriptors.Add(descriptor);
             }
 
             Registry.Refresh(descriptors);
             Log.Info("wormhole-scan reason=" + reason + " bodies=" + Registry.Bodies.Count +
                      " pairs=" + Registry.Pairs.Count + " issues=" + Registry.Issues.Count);
+
+            foreach (WormholeBodyDescriptor descriptor in descriptors)
+                Log.Info("wormhole-body " + FormatBody(descriptor));
 
             foreach (WormholePairDescriptor pair in Registry.Pairs)
             {
@@ -106,9 +123,19 @@ namespace RemoteTechWormholeBridge
         {
             return body.BodyId + "->" + body.PartnerBodyId +
                    ",radius=" + body.BodyRadius.ToString("R", System.Globalization.CultureInfo.InvariantCulture) +
+                   ",soi=" + body.SphereOfInfluence.ToString("R", System.Globalization.CultureInfo.InvariantCulture) +
                    ",influence=" + body.InfluenceAltitude.ToString("R", System.Globalization.CultureInfo.InvariantCulture) +
                    ",jumpMin=" + body.JumpMinAltitude.ToString("R", System.Globalization.CultureInfo.InvariantCulture) +
-                   ",jumpMax=" + body.JumpMaxAltitude.ToString("R", System.Globalization.CultureInfo.InvariantCulture);
+                   ",jumpMax=" + body.JumpMaxAltitude.ToString("R", System.Globalization.CultureInfo.InvariantCulture) +
+                   ",operationalBand=" + FormatBand(body.OperationalBand);
+        }
+
+        private static string FormatBand(BridgeOperationalBand band)
+        {
+            return band == null
+                ? "invalid"
+                : band.MinimumLocalDistance.ToString("R", System.Globalization.CultureInfo.InvariantCulture) +
+                  "-" + band.MaximumLocalDistance.ToString("R", System.Globalization.CultureInfo.InvariantCulture);
         }
     }
 }
