@@ -57,13 +57,14 @@ namespace RemoteTechWormholeBridge.Core.Endpoints
                 return EndpointFailureReason.WrongTarget;
             if (!candidate.BridgeCapabilityEnabled)
                 return EndpointFailureReason.BridgeCapabilityMissing;
-            if (!candidate.IsInOperationalRegion)
+            BridgeOperationalBand band = candidate.OperationalBand;
+            if (!candidate.IsInOperationalRegion || band == null)
                 return EndpointFailureReason.UnsafeRegion;
-            if (candidate.LocalDistance < BridgeOperationalBand.MinimumLocalDistance)
+            if (candidate.LocalDistance < band.MinimumLocalDistance)
                 return EndpointFailureReason.TooCloseToWormhole;
-            if (candidate.LocalDistance > BridgeOperationalBand.MaximumLocalDistance)
+            if (candidate.LocalDistance > band.MaximumLocalDistance)
                 return EndpointFailureReason.TooFarFromWormhole;
-            if (!BridgeOperationalBand.Contains(candidate.LocalDistance))
+            if (!band.Contains(candidate.LocalDistance))
                 return EndpointFailureReason.UnsafeRegion;
             if (!candidate.HasLocalRange)
                 return EndpointFailureReason.InsufficientLocalRange;

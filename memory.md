@@ -1,6 +1,6 @@
 # Estado verificado de RTWB
 
-Actualizado: 2026-08-04.
+Actualizado: 2026-08-11.
 
 ## Completado
 
@@ -150,6 +150,44 @@ Actualizado: 2026-08-04.
   core, el smoke test de Harmony y `pedump`. El ZIP instalable contiene solo
   archivos propios y su SHA-256 es
   `d7e9d4cfc6771bef97b6822e165a5ef7f19e413b70050e2c114df392ab7e29c7`.
+- Publicada la prerelease `v0.5.0-beta.1`; el tag permanece en el commit binario
+  `bccd830b504033682863e01b1caf83b156f72a6e`. El README público quedó en inglés,
+  reconoce a WormholeSignalBridge como inspiración y acredita la asistencia de
+  OpenAI Codex.
+- Los cuatro wormholes opcionales de Promised Worlds suministrados usan radio de
+  10 km, SOI de 80 km, `influenceAltitude=35 km`, `jumpMaxAltitude=30 km` y
+  `jumpMinAltitude=10 m`. Singularity solo aporta su representación visual; KEX
+  ejecuta el salto. Promised Worlds los deshabilita por defecto y requiere
+  `Wormholes=True` para probarlos.
+- Implementada una banda operacional inmutable por wormhole. Calcula espacio
+  disponible como `SOI - transitionRadius`, máximo como
+  `min(300 km, available*0.8)` y mínimo como `max(5 km, maximum/3)`. Una SOI de
+  80 km con transición a 45 km produce aproximadamente 9,33-28 km; una SOI
+  amplia produce matemáticamente 100-300 km sin excepciones por planet pack.
+- La validación, scanner, logging y conos consumen la misma banda del descriptor.
+  SOI no finitas, negativas, inferiores a la transición o que produzcan bandas
+  degeneradas se rechazan sin modificar datos externos.
+- Implementados dos anillos rojos `#FF3030` semitransparentes en el plano orbital de la
+  nave seleccionada, con fallback ecuatorial estable. Se muestran con el filtro
+  Cone para una antena direccional RTWB activa, alimentada y apuntada al agujero,
+  aunque la nave esté fuera de banda. Reutilizan el pool de `MapLineMesh`.
+- El cambio de banda dinámica y anillos compila Release con cero avisos y
+  errores; pasan pruebas core de SOI grande/media/pequeña/inválida, smoke test de
+  Harmony aislado y `pedump --verify all`.
+- Validado dentro de KSP con los wormholes de Kcalbeloh: el usuario confirmó que
+  el enlace sigue funcionando perfectamente y que ambos anillos se ven y se
+  comportan correctamente.
+- Validada dentro de KSP la banda comprimida de Promised Worlds. El log detecta
+  las bocas Kevbas A/B con SOI de 80 km y banda `9,333-28 km`; acepta relés a
+  aproximadamente 15,47 y 25 km, mantiene cobertura bidireccional activa con
+  error angular cercano a 3 grados frente a 45 grados de semicono, inyecta ambas
+  aristas en el grafo y registra una ruta real de RemoteTech desde Kevbas B hasta
+  KSC. No aparece ninguna excepción ni pila de llamadas de RTWB.
+- Esa sesión usó la compilación anterior al cambio visual de los anillos a rojo:
+  el log aún muestra `renderer-attached color=#FF4FD8` y no los campos separados
+  `bridgeColor`/`guideColor`. La lógica y el render de anillos quedaron validados,
+  pero el rojo `#FF3030` solo requiere una comprobación visual breve con la DLL
+  Release más reciente.
 
 ## Decisiones vigentes
 
@@ -164,9 +202,9 @@ Actualizado: 2026-08-04.
 
 ## Siguiente trabajo
 
-1. Publicar el commit de `0.5.0-beta.1`.
-2. Con autorización explícita, crear la primera release beta con su ZIP
-   instalable.
+1. Instalar y validar conjuntamente la dependencia RemoteTech Overhaul que
+   conserva la precisión doble de `VesselSatellite.Position`.
+2. Decidir versión, empaquetado y publicación de la actualización.
 
 ## Bloqueos/riesgos
 
@@ -176,3 +214,16 @@ Actualizado: 2026-08-04.
   el smoke test la verifica y el runtime degrada omitiendo solo esos endpoints.
 - La autorización GPLv3 del proyecto queda registrada, pero RTWB sigue
   dependiendo de APIs de terceros y debe respetar sus avisos y condiciones.
+- RemoteTech 1.9.12 degrada `Vessel.GetWorldPos3D()` de `Vector3d` a
+  `UnityEngine.Vector3` dentro de cada `ISignalProcessor.Position`, y después
+  vuelve a convertirlo a `Vector3d` en `VesselSatellite.Position`. A distancias
+  interestelares esto pierde kilómetros de resolución. La corrección general se
+  ha extraído a RemoteTech Overhaul; este proyecto la declara como dependencia
+  y ya no parchea por si mismo el getter de RemoteTech.
+- Retirados los diagnósticos temporales de auditoría del grafo
+  (`path-bridge-state`, vecinos, aristas y secuencias completas de saltos). Se
+  conserva únicamente el resumen operativo original `path-bridge-routes`.
+- Las aristas visuales de los conos se recortan mediante intersección con
+  `BridgeOperationalBand.InnerRadius` y `OuterRadius`. El resultado es un cono
+  truncado que empieza y termina exactamente en los límites radiales elegibles,
+  sin cambiar la geometría de cobertura ni el grafo.

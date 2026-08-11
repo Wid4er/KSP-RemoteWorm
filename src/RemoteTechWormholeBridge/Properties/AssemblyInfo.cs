@@ -11,3 +11,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("0.5.0.1")]
 [assembly: AssemblyInformationalVersion("0.5.0-beta.1")]
 [assembly: KSPAssembly("RemoteTechWormholeBridge", 0, 5)]
+[assembly: KSPAssemblyDependency("RemoteTechOverhaul", 0, 1)]

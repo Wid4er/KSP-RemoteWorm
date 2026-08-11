@@ -74,10 +74,34 @@ En vuelo, la nave propietaria de la ruta es `FlightGlobals.ActiveVessel` y debe
 conservarse aunque la cámara se enfoque sobre un cuerpo o agujero distante; usar
 solo `MapCamera.target.vessel` hace imposible observar el tramo remoto.
 
-El cono saliente debe usar `exitPoint`, dirección radial transformada, semiancho
-real y longitud visual limitada. Debe reutilizar material/capa/conversiones de
-`NetworkCone`, pero no su clase directamente: `NetworkCone` asume que el origen
-es una antena registrada y que el eje termina en un objetivo normal.
+El cono saliente usa `exitPoint`, dirección radial transformada y semiancho real.
+Sus dos aristas se recortan por intersección con `InnerRadius` y `OuterRadius`
+de `BridgeOperationalBand`, por lo que forman un cono truncado que solo ocupa la
+banda donde un relé puede ser elegible. Debe reutilizar
+material/capa/conversiones de `NetworkCone`, pero no su clase directamente:
+`NetworkCone` asume que el origen es una antena registrada y que el eje termina
+en un objetivo normal.
+
+## Anillos de banda operacional
+
+Cuando la nave relevante tiene una antena RTWB direccional, habilitada, activa,
+alimentada y apuntada al agujero local, el renderer dibuja dos círculos rojos
+semitransparentes:
+
+```text
+radio interior = transitionRadius + minimumLocalDistance
+radio exterior = transitionRadius + maximumLocalDistance
+```
+
+No se exige que la nave ya esté dentro de la banda. Los círculos usan el plano
+orbital obtenido de posición y velocidad evaluadas de la nave seleccionada. Si
+ese plano degenera, usan el plano ecuatorial estable del cuerpo. Son mallas sin
+collider, no objetos `Orbit`, y no modifican patched conics.
+
+Cada círculo se aproxima mediante segmentos del mismo pool de `MapLineMesh`.
+Las tablas trigonométricas se crean una sola vez y los `GameObject` solo se
+añaden cuando el pool necesita crecer, no en cada frame. Su visibilidad sigue el
+filtro Cone de RemoteTech.
 
 ## Riesgos de renderizado
 
@@ -90,4 +114,3 @@ es una antena registrada y que el eje termina en un objetivo normal.
   `Transform` persistentes.
 - Si el renderer falla, el grafo debe seguir funcionando y los objetos deben
   limpiarse al cambiar de escena.
-- Hasta demostrar el enlace lógico no se implementarán líneas ni conos.

@@ -80,10 +80,12 @@ namespace RemoteTechWormholeBridge.Core.Wormholes
                 return false;
             }
 
-            if (!FiniteNonNegative(body.BodyRadius) || !FiniteNonNegative(body.InfluenceAltitude) ||
+            if (!FiniteNonNegative(body.BodyRadius) || !FinitePositive(body.SphereOfInfluence) ||
+                !FiniteNonNegative(body.InfluenceAltitude) ||
                 !FiniteNonNegative(body.JumpMinAltitude) || !FiniteNonNegative(body.JumpMaxAltitude))
             {
-                _issues.Add(new RegistryIssue(body.BodyId, "radii and altitudes must be finite and non-negative"));
+                _issues.Add(new RegistryIssue(body.BodyId,
+                    "radii, SOI and altitudes must be finite and physically valid"));
                 return false;
             }
 
@@ -93,12 +95,24 @@ namespace RemoteTechWormholeBridge.Core.Wormholes
                 return false;
             }
 
+            if (body.OperationalBand == null)
+            {
+                _issues.Add(new RegistryIssue(body.BodyId,
+                    "SOI does not contain a non-degenerate operational band outside the transition radius"));
+                return false;
+            }
+
             return true;
         }
 
         private static bool FiniteNonNegative(double value)
         {
             return !Double.IsNaN(value) && !Double.IsInfinity(value) && value >= 0;
+        }
+
+        private static bool FinitePositive(double value)
+        {
+            return !Double.IsNaN(value) && !Double.IsInfinity(value) && value > 0;
         }
 
         private static string PairKey(string a, string b)

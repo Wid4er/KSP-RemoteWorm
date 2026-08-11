@@ -24,6 +24,7 @@ namespace RemoteTechWormholeBridge.Core.Endpoints
         public bool BridgeCapabilityEnabled { get; set; }
         public bool IsInOperationalRegion { get; set; }
         public double LocalDistance { get; set; }
+        public BridgeOperationalBand OperationalBand { get; set; }
         public bool HasLocalRange { get; set; }
 
         public string Key

@@ -67,6 +67,29 @@ namespace RemoteTechWormholeBridge.Core.Geometry
             return radial.Normalized().Scale(transitionRadius);
         }
 
+        public static bool TryBoundaryRayDistance(
+            double transitionRadius,
+            double boundaryRadius,
+            double cosHalfAngle,
+            out double rayDistance)
+        {
+            rayDistance = 0;
+            if (!FinitePositive(transitionRadius) || !FinitePositive(boundaryRadius) ||
+                boundaryRadius <= transitionRadius ||
+                Double.IsNaN(cosHalfAngle) || Double.IsInfinity(cosHalfAngle))
+                return false;
+
+            double cosine = Clamp(cosHalfAngle, -1.0, 1.0);
+            double sineSquared = Math.Max(0.0, 1.0 - cosine * cosine);
+            double radicand = boundaryRadius * boundaryRadius -
+                              transitionRadius * transitionRadius * sineSquared;
+            if (!FinitePositive(radicand))
+                return false;
+
+            rayDistance = -transitionRadius * cosine + Math.Sqrt(radicand);
+            return FinitePositive(rayDistance);
+        }
+
         private static double Clamp(double value, double minimum, double maximum)
         {
             if (value < minimum)
@@ -74,6 +97,11 @@ namespace RemoteTechWormholeBridge.Core.Geometry
             if (value > maximum)
                 return maximum;
             return value;
+        }
+
+        private static bool FinitePositive(double value)
+        {
+            return !Double.IsNaN(value) && !Double.IsInfinity(value) && value > 0;
         }
     }
 }

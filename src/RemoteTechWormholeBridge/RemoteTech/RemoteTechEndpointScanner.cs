@@ -26,12 +26,18 @@ namespace RemoteTechWormholeBridge
     {
         private static readonly EndpointRegistry Registry = new EndpointRegistry();
         private static readonly List<RuntimeEndpoint> AcceptedEndpoints = new List<RuntimeEndpoint>();
+        private static readonly List<RuntimeEndpoint> GuideEndpoints = new List<RuntimeEndpoint>();
         private static string lastState;
         private static bool protoBindingWarningLogged;
 
         internal static IReadOnlyList<RuntimeEndpoint> Accepted
         {
             get { return AcceptedEndpoints; }
+        }
+
+        internal static IReadOnlyList<RuntimeEndpoint> Guides
+        {
+            get { return GuideEndpoints; }
         }
 
         internal static List<RuntimeEndpoint> SnapshotAccepted()
@@ -52,11 +58,20 @@ namespace RemoteTechWormholeBridge
 
             Registry.Refresh(candidates);
             AcceptedEndpoints.Clear();
+            GuideEndpoints.Clear();
             foreach (EndpointDescriptor descriptor in Registry.Endpoints.Values.OrderBy(value => value.Key))
             {
                 RuntimeEndpoint runtime;
                 if (runtimeByKey.TryGetValue(descriptor.Key, out runtime))
                     AcceptedEndpoints.Add(runtime);
+            }
+
+            foreach (EndpointDescriptor descriptor in candidates.OrderBy(value => value.Key))
+            {
+                RuntimeEndpoint runtime;
+                if (IsGuideCandidate(descriptor) &&
+                    runtimeByKey.TryGetValue(descriptor.Key, out runtime))
+                    GuideEndpoints.Add(runtime);
             }
 
             string currentState = BuildState(candidates);
@@ -87,9 +102,9 @@ namespace RemoteTechWormholeBridge
                          " dishAngleDeg=" + Format(HalfAngleDegrees(antenna.CosAngle) * 2) +
                          " cosHalfAngle=" + Format(antenna.CosAngle) +
                          " localDistance=" + Format(runtime.LocalDistance) +
-                         " operationalBand=" + Format(BridgeOperationalBand.MinimumLocalDistance) +
-                         "-" + Format(BridgeOperationalBand.MaximumLocalDistance) +
+                         " operationalBand=" + FormatBand(candidate.OperationalBand) +
                          " transitionRadius=" + Format(runtime.Wormhole.TransitionRadius) +
+                         " soi=" + Format(runtime.Wormhole.Body.sphereOfInfluence) +
                          " altitude=" + Format(runtime.Vessel.altitude));
             }
 
@@ -113,7 +128,7 @@ namespace RemoteTechWormholeBridge
             double relativeRadius = relativePosition.magnitude;
             bool hasRadial = IsFinite(relativeRadius) && relativeRadius > 0;
             double localDistance = hasRadial
-                ? Math.Max(0, relativeRadius - wormhole.TransitionRadius)
+                ? relativeRadius - wormhole.TransitionRadius
                 : Double.PositiveInfinity;
 
             IEnumerable<IAntenna> antennas = RTCore.Instance.Antennas[vessel];
@@ -144,6 +159,7 @@ namespace RemoteTechWormholeBridge
                     BridgeCapabilityEnabled = bridgeEnabled,
                     IsInOperationalRegion = hasRadial,
                     LocalDistance = localDistance,
+                    OperationalBand = wormhole.OperationalBand,
                     HasLocalRange = hasRadial && antenna.Dish >= localDistance
                 };
                 candidates.Add(candidate);
@@ -240,10 +256,30 @@ namespace RemoteTechWormholeBridge
             {
                 builder.Append(candidate.Key).Append('|')
                     .Append((int)EndpointRegistry.Validate(candidate)).Append('|')
-                    .Append(candidate.Channel).Append(';');
+                    .Append(candidate.Channel).Append('|')
+                    .Append(FormatBand(candidate.OperationalBand)).Append(';');
             }
 
             return builder.ToString();
+        }
+
+        private static bool IsGuideCandidate(EndpointDescriptor candidate)
+        {
+            return candidate != null &&
+                   candidate.IsRemoteTechVessel &&
+                   candidate.Activated &&
+                   candidate.Powered &&
+                   candidate.IsDirectional &&
+                   candidate.TargetsLocalWormhole &&
+                   candidate.BridgeCapabilityEnabled &&
+                   candidate.OperationalBand != null;
+        }
+
+        private static string FormatBand(BridgeOperationalBand band)
+        {
+            return band == null
+                ? "invalid"
+                : Format(band.MinimumLocalDistance) + "-" + Format(band.MaximumLocalDistance);
         }
 
         private static bool IsFinite(double value)

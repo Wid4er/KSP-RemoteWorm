@@ -34,6 +34,7 @@ You need:
 
 - **Kerbal Space Program 1.12.5**;
 - **RemoteTech 1.9.12**;
+- **RemoteTech Overhaul 0.1 or later**;
 - **Kopernicus Expansion Continued-er**, including `KEX-Wormholes`;
 - KEX dependencies, including **Kopernicus**;
 - **HarmonyKSP**;
@@ -58,6 +59,9 @@ Kerbal Space Program/
             └── RemoteTechWormholeBridge.dll
 ```
 
+RemoteTech Overhaul must be installed separately at
+`GameData/RemoteTechOverhaul/Plugins/RemoteTechOverhaul.dll`.
+
 The ZIP contains RTWB only. It does not include KSP or any dependency DLLs.
 
 ## Setting up a link
@@ -66,12 +70,15 @@ The ZIP contains RTWB only. It does not include KSP or any dependency DLLs.
    same wormhole.
 2. Target each antenna at its local wormhole body.
 3. Keep both antennas active and powered.
-4. Place each relay between **100 and 300 km from the KEX transition surface**.
+4. Use the two red guide rings to place each relay inside the operational
+   band calculated for that wormhole's sphere of influence.
 5. Position the relays in compatible regions around both mouths so that each
    falls within the cone projected by the other.
 
-For the `WH3141A` and `WH3141B` wormholes in Kcalbeloh System, the valid band is
-approximately **135 to 335 km altitude** above the body.
+RTWB reserves the outer 20% of the space between the KEX transition surface and
+the edge of the sphere of influence. Large wormholes naturally use an
+approximately **100–300 km** local band, while smaller wormholes receive a
+proportionally compressed band that remains orbitable.
 
 Once the geometry is valid, the link appears automatically and RemoteTech can
 use it for routing. If several relays are compatible, RemoteTech chooses the
@@ -83,7 +90,10 @@ In map view or the Tracking Station, enable RemoteTech's dish and cone filters:
 
 - **magenta lines** represent active wormhole links;
 - **magenta cones** show where a compatible relay could be placed;
-- each cone ends 300 km from the transition surface;
+- the two **red rings** mark the inner and outer limits for the selected
+  relay, even when it is currently outside the valid band;
+- each cone is truncated between the calculated inner and outer limits of its
+  wormhole;
 - RTWB never draws a line across the interstellar distance between the systems.
 
 ## Beta status

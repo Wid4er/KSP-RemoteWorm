@@ -1,7 +1,10 @@
 RemoteTech Wormhole Bridge 0.5.0 beta 1
 
-Operational relay band: 100-300 km from the transition surface.
-Map visuals: magenta #FF4FD8; outgoing cone length: 300 km.
+Operational relay band: calculated independently for each wormhole from its
+transition surface and sphere of influence, with a 300 km desired maximum.
+Map visuals: links/cones use magenta #FF4FD8; guide rings use red #FF3030. Cone
+edges are truncated between the local inner and outer limits, matching the valid
+relay band shown by the rings around the selected wormhole.
 
 This beta mutates RemoteTech's logical graph when a validated bidirectional
 wormhole pair is active. It does not emit RemoteTech renderer events and does
@@ -18,6 +21,7 @@ an effective local path cost.
 Required:
 - Kerbal Space Program 1.12.5
 - RemoteTech
+- RemoteTech Overhaul 0.1 or later
 - Kopernicus Expansion Continued (KEX-Wormholes)
 - HarmonyKSP
 - ModuleManager
