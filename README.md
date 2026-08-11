@@ -1,3 +1,5 @@
+> **AI involvement disclosure:** ChatGPT-5.6 was involved in the development of this project.
+
 # RemoteTech Wormhole Bridge (RTWB)
 
 **Mod for Kerbal Space Program 1, version 1.12.5.**
