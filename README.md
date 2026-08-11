@@ -1,13 +1,13 @@
 # RemoteTech Wormhole Bridge (RTWB)
 
-**Beta mod for Kerbal Space Program 1, version 1.12.5.**
+**Mod for Kerbal Space Program 1, version 1.12.5.**
 
 RemoteTech Wormhole Bridge allows **RemoteTech signals to travel through
 Kopernicus Expansion (KEX) wormholes**. This lets you maintain communication
 networks across star systems without antennas that reach for light-years or
 impractically long interstellar signal delays.
 
-Current version: **0.5.0-beta.1**.
+Current version: **0.6.0**.
 
 ## What it does
 
@@ -34,7 +34,7 @@ You need:
 
 - **Kerbal Space Program 1.12.5**;
 - **RemoteTech 1.9.12**;
-- **RemoteTech Overhaul 0.1 or later**;
+- [**RemoteTech Overhaul 0.1 or later**](https://github.com/Wid4er/KSP-RemoteTechOverhaul/releases);
 - **Kopernicus Expansion Continued-er**, including `KEX-Wormholes`;
 - KEX dependencies, including **Kopernicus**;
 - **HarmonyKSP**;
@@ -96,7 +96,7 @@ In map view or the Tracking Station, enable RemoteTech's dish and cone filters:
   wormhole;
 - RTWB never draws a line across the interstellar distance between the systems.
 
-## Beta status
+## Compatibility and testing
 
 This version has been tested with KSP 1.12.5, RemoteTech 1.9.12, and
 KEX-Wormholes 1.0. Verified support includes:
@@ -108,7 +108,7 @@ KEX-Wormholes 1.0. Verified support includes:
 - docking, undocking, and vessel destruction;
 - multiple relays around the same pair of wormhole mouths.
 
-As this is a beta, back up your save before installing it.
+Back up your save before installing or updating gameplay mods.
 
 ## Technical documentation
 

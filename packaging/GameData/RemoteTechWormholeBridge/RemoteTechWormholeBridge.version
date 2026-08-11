@@ -4,9 +4,9 @@
   "DOWNLOAD": "https://github.com/Wid4er/KSP-RemoteWorm/releases",
   "VERSION": {
     "MAJOR": 0,
-    "MINOR": 5,
+    "MINOR": 6,
     "PATCH": 0,
-    "BUILD": 1
+    "BUILD": 0
   },
   "KSP_VERSION_MIN": {
     "MAJOR": 1,

@@ -202,9 +202,8 @@ Actualizado: 2026-08-11.
 
 ## Siguiente trabajo
 
-1. Instalar y validar conjuntamente la dependencia RemoteTech Overhaul que
-   conserva la precisión doble de `VesselSatellite.Position`.
-2. Decidir versión, empaquetado y publicación de la actualización.
+1. Validar una instalación limpia del ZIP publicado `0.6.0` junto con
+   RemoteTech Overhaul `0.1.0`.
 
 ## Bloqueos/riesgos
 
@@ -227,3 +226,7 @@ Actualizado: 2026-08-11.
   `BridgeOperationalBand.InnerRadius` y `OuterRadius`. El resultado es un cono
   truncado que empieza y termina exactamente en los límites radiales elegibles,
   sin cambiar la geometría de cobertura ni el grafo.
+- RemoteTech Overhaul `v0.1.0` está publicado como dependencia independiente en
+  `Wid4er/KSP-RemoteTechOverhaul`. La release estable RTWB `0.6.0` usa esa
+  dependencia, reemplaza el aviso beta por documentación de instalación y se
+  empaqueta únicamente bajo `GameData/RemoteTechWormholeBridge`.

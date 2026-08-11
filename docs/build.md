@@ -77,4 +77,4 @@ Versiones de assembly comprobadas:
 
 El bloqueo de referencias, la transformación radial, la cobertura, la inyección
 de enlaces y el renderizado quedaron validados dentro de Unity/KSP. El paquete
-beta incluye el texto completo de GPLv3, pero no incluye DLL de terceros.
+incluye el texto completo de GPLv3, pero no incluye DLL de terceros.
