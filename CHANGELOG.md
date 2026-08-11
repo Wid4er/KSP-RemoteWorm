@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.6.0 - 2026-08-11
+
 - Traslada la correccion general de precision de posiciones a la nueva
   dependencia RemoteTech Overhaul, evitando mantener el mismo parche dentro de
   este plugin.
