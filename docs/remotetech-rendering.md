@@ -74,11 +74,13 @@ En vuelo, la nave propietaria de la ruta es `FlightGlobals.ActiveVessel` y debe
 conservarse aunque la cámara se enfoque sobre un cuerpo o agujero distante; usar
 solo `MapCamera.target.vessel` hace imposible observar el tramo remoto.
 
-El cono saliente debe usar `exitPoint`, dirección radial transformada, semiancho
-real y la longitud máxima calculada por `BridgeOperationalBand` para el agujero
-de salida. Debe reutilizar material/capa/conversiones de `NetworkCone`, pero no
-su clase directamente: `NetworkCone` asume que el origen es una antena
-registrada y que el eje termina en un objetivo normal.
+El cono saliente usa `exitPoint`, dirección radial transformada y semiancho real.
+Sus dos aristas se recortan por intersección con `InnerRadius` y `OuterRadius`
+de `BridgeOperationalBand`, por lo que forman un cono truncado que solo ocupa la
+banda donde un relé puede ser elegible. Debe reutilizar
+material/capa/conversiones de `NetworkCone`, pero no su clase directamente:
+`NetworkCone` asume que el origen es una antena registrada y que el eje termina
+en un objetivo normal.
 
 ## Anillos de banda operacional
 

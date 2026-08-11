@@ -202,9 +202,8 @@ Actualizado: 2026-08-11.
 
 ## Siguiente trabajo
 
-1. Instalar la DLL Release más reciente y comprobar visualmente que los dos
-   anillos guía se muestran en rojo `#FF3030`; la banda, el enlace y el grafo ya
-   están validados con Promised Worlds.
+1. Instalar y validar conjuntamente la dependencia RemoteTech Overhaul que
+   conserva la precisión doble de `VesselSatellite.Position`.
 2. Decidir versión, empaquetado y publicación de la actualización.
 
 ## Bloqueos/riesgos
@@ -215,3 +214,16 @@ Actualizado: 2026-08-11.
   el smoke test la verifica y el runtime degrada omitiendo solo esos endpoints.
 - La autorización GPLv3 del proyecto queda registrada, pero RTWB sigue
   dependiendo de APIs de terceros y debe respetar sus avisos y condiciones.
+- RemoteTech 1.9.12 degrada `Vessel.GetWorldPos3D()` de `Vector3d` a
+  `UnityEngine.Vector3` dentro de cada `ISignalProcessor.Position`, y después
+  vuelve a convertirlo a `Vector3d` en `VesselSatellite.Position`. A distancias
+  interestelares esto pierde kilómetros de resolución. La corrección general se
+  ha extraído a RemoteTech Overhaul; este proyecto la declara como dependencia
+  y ya no parchea por si mismo el getter de RemoteTech.
+- Retirados los diagnósticos temporales de auditoría del grafo
+  (`path-bridge-state`, vecinos, aristas y secuencias completas de saltos). Se
+  conserva únicamente el resumen operativo original `path-bridge-routes`.
+- Las aristas visuales de los conos se recortan mediante intersección con
+  `BridgeOperationalBand.InnerRadius` y `OuterRadius`. El resultado es un cono
+  truncado que empieza y termina exactamente en los límites radiales elegibles,
+  sin cambiar la geometría de cobertura ni el grafo.

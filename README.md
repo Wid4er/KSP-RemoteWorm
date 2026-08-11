@@ -34,6 +34,7 @@ You need:
 
 - **Kerbal Space Program 1.12.5**;
 - **RemoteTech 1.9.12**;
+- **RemoteTech Overhaul 0.1 or later**;
 - **Kopernicus Expansion Continued-er**, including `KEX-Wormholes`;
 - KEX dependencies, including **Kopernicus**;
 - **HarmonyKSP**;
@@ -57,6 +58,9 @@ Kerbal Space Program/
         └── Plugins/
             └── RemoteTechWormholeBridge.dll
 ```
+
+RemoteTech Overhaul must be installed separately at
+`GameData/RemoteTechOverhaul/Plugins/RemoteTechOverhaul.dll`.
 
 The ZIP contains RTWB only. It does not include KSP or any dependency DLLs.
 
@@ -88,7 +92,8 @@ In map view or the Tracking Station, enable RemoteTech's dish and cone filters:
 - **magenta cones** show where a compatible relay could be placed;
 - the two **red rings** mark the inner and outer limits for the selected
   relay, even when it is currently outside the valid band;
-- each cone ends at the calculated outer limit of its wormhole;
+- each cone is truncated between the calculated inner and outer limits of its
+  wormhole;
 - RTWB never draws a line across the interstellar distance between the systems.
 
 ## Beta status

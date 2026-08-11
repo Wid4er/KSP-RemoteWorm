@@ -28,6 +28,7 @@ namespace RemoteTechWormholeBridge.Core.Tests
                 FindsAConcreteBridgeInsideASelectedVesselRoute();
                 ComputesIdentityCoverageInBothDirections();
                 RejectsCoverageOutsideEitherCone();
+                ClipsRenderedConeToOperationalRadii();
                 Console.WriteLine("RTWB core tests passed.");
                 return 0;
             }
@@ -281,6 +282,78 @@ namespace RemoteTechWormholeBridge.Core.Tests
             Assert(!result.AToB.Covers, "A must reject B outside A's half-angle");
             Assert(result.BToA.Covers, "B must cover A inside B's half-angle");
             Assert(!result.Active, "a bridge must require bidirectional coverage");
+        }
+
+        private static void ClipsRenderedConeToOperationalRadii()
+        {
+            BridgeOperationalBand band = Band(45000, 5000000);
+            double cosine = Math.Cos(45 * Math.PI / 180.0);
+            double sine = Math.Sqrt(1.0 - cosine * cosine);
+            double innerDistance;
+            double outerDistance;
+
+            Assert(WormholeConeCoverage.TryBoundaryRayDistance(
+                    band.TransitionRadius,
+                    band.InnerRadius,
+                    cosine,
+                    out innerDistance),
+                "the cone edge must intersect the inner operational radius");
+            Assert(WormholeConeCoverage.TryBoundaryRayDistance(
+                    band.TransitionRadius,
+                    band.OuterRadius,
+                    cosine,
+                    out outerDistance),
+                "the cone edge must intersect the outer operational radius");
+
+            double innerAxial = band.TransitionRadius + innerDistance * cosine;
+            double innerLateral = innerDistance * sine;
+            double outerAxial = band.TransitionRadius + outerDistance * cosine;
+            double outerLateral = outerDistance * sine;
+            AssertClose(
+                Math.Sqrt(innerAxial * innerAxial + innerLateral * innerLateral),
+                band.InnerRadius,
+                0.001,
+                "the rendered edge must begin exactly on the inner guide radius");
+            AssertClose(
+                Math.Sqrt(outerAxial * outerAxial + outerLateral * outerLateral),
+                band.OuterRadius,
+                0.001,
+                "the rendered edge must end exactly on the outer guide radius");
+            Assert(innerDistance < outerDistance,
+                "the truncated cone edge must grow from the inner to the outer boundary");
+
+            double axialInner;
+            double axialOuter;
+            Assert(WormholeConeCoverage.TryBoundaryRayDistance(
+                    band.TransitionRadius,
+                    band.InnerRadius,
+                    1.0,
+                    out axialInner),
+                "an axial cone must intersect the inner operational radius");
+            Assert(WormholeConeCoverage.TryBoundaryRayDistance(
+                    band.TransitionRadius,
+                    band.OuterRadius,
+                    1.0,
+                    out axialOuter),
+                "an axial cone must intersect the outer operational radius");
+            AssertClose(axialInner, band.MinimumLocalDistance, 0.001,
+                "an axial cone must start at the minimum local distance");
+            AssertClose(axialOuter, band.MaximumLocalDistance, 0.001,
+                "an axial cone must end at the maximum local distance");
+
+            double ignored;
+            Assert(!WormholeConeCoverage.TryBoundaryRayDistance(
+                    band.TransitionRadius,
+                    band.TransitionRadius,
+                    cosine,
+                    out ignored),
+                "a boundary at the transition surface cannot form a visible span");
+            Assert(!WormholeConeCoverage.TryBoundaryRayDistance(
+                    band.TransitionRadius,
+                    Double.NaN,
+                    cosine,
+                    out ignored),
+                "a non-finite boundary radius must be rejected");
         }
 
         private static WormholeBodyDescriptor Body(string id, string partner)

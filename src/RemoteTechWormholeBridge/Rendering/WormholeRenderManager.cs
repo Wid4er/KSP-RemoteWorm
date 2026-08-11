@@ -37,7 +37,7 @@ namespace RemoteTechWormholeBridge
             instance = MapView.MapCamera.gameObject.AddComponent<WormholeRenderManager>();
             Log.Info("renderer-attached bridgeColor=#FF4FD8 guideColor=#FF3030" +
                      " operationalBand=per-wormhole" +
-                     " coneLength=per-wormhole guideRings=true" +
+                     " coneSpan=inner-to-outer guideRings=true" +
                      " visibility=selected-wormhole-pair-route");
         }
 
@@ -190,7 +190,7 @@ namespace RemoteTechWormholeBridge
                          " guideBody=" + guideBody +
                          " selection=" + (visibleFromRoute ? "route" : "endpoint") +
                          " selected=" + SelectedName(focused, selectedRouteVessel) +
-                         " coneLength=per-wormhole");
+                         " coneSpan=inner-to-outer");
             }
         }
 
@@ -208,19 +208,41 @@ namespace RemoteTechWormholeBridge
             if (!IsFinite(direction) || direction.sqrMagnitude <= 0)
                 return false;
 
-            Vector3d origin = destination.Body.position +
-                              direction * destination.TransitionRadius;
             double cosine = Math.Max(-1.0, Math.Min(1.0, source.Antenna.CosAngle));
-            double halfAngle = Math.Acos(cosine);
+            double sine = Math.Sqrt(Math.Max(0.0, 1.0 - cosine * cosine));
             Vector3d perpendicular = ConePerpendicular(destination.Body, direction);
             if (perpendicular.sqrMagnitude <= 0)
                 return false;
 
-            double length = destination.OperationalBand.MaximumLocalDistance;
-            Vector3d axial = direction * length;
-            Vector3d lateral = perpendicular * (Math.Tan(halfAngle) * length);
-            DrawLine(ref used, origin, origin + axial + lateral, ConeColor);
-            DrawLine(ref used, origin, origin + axial - lateral, ConeColor);
+            double innerDistance;
+            double outerDistance;
+            if (!WormholeConeCoverage.TryBoundaryRayDistance(
+                    destination.TransitionRadius,
+                    destination.OperationalBand.InnerRadius,
+                    cosine,
+                    out innerDistance) ||
+                !WormholeConeCoverage.TryBoundaryRayDistance(
+                    destination.TransitionRadius,
+                    destination.OperationalBand.OuterRadius,
+                    cosine,
+                    out outerDistance) ||
+                innerDistance >= outerDistance)
+                return false;
+
+            Vector3d apex = destination.Body.position +
+                             direction * destination.TransitionRadius;
+            Vector3d upperEdge = direction * cosine + perpendicular * sine;
+            Vector3d lowerEdge = direction * cosine - perpendicular * sine;
+            DrawLine(
+                ref used,
+                apex + upperEdge * innerDistance,
+                apex + upperEdge * outerDistance,
+                ConeColor);
+            DrawLine(
+                ref used,
+                apex + lowerEdge * innerDistance,
+                apex + lowerEdge * outerDistance,
+                ConeColor);
             return true;
         }
 
