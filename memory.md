@@ -1,6 +1,6 @@
 # Estado verificado de RTWB
 
-Actualizado: 2026-08-11.
+Actualizado: 2026-09-11.
 
 ## Completado
 
@@ -202,8 +202,8 @@ Actualizado: 2026-08-11.
 
 ## Siguiente trabajo
 
-1. Preparar commit, paquete y publicación de la integración de contratos cuando
-   el propietario lo solicite.
+1. Validar visualmente dentro de KSP que los anillos siguen a la boca enfocada y
+   que Path/MultiPath mantienen los segmentos magenta con Dish desactivado.
 
 ## Bloqueos/riesgos
 
@@ -230,7 +230,7 @@ Actualizado: 2026-08-11.
   `Wid4er/KSP-RemoteTechOverhaul`. La release estable RTWB `0.6.0` usa esa
   dependencia, reemplaza el aviso beta por documentación de instalación y se
   empaqueta únicamente bajo `GameData/RemoteTechWormholeBridge`.
-- La integración de contratos todavía no está publicada. El build local añade
+- La integración de contratos se publica desde `0.7.0`. El build añade
   `RemoteTechWormholeBridge.Contracts.dll`, condicionado mediante
   `KSPAssemblyDependency` a Contract Configurator 2.x, mientras el DLL principal
   no contiene ninguna referencia a Contract Configurator. Una carga aislada del
@@ -270,3 +270,9 @@ Actualizado: 2026-08-11.
   renderer nativo permite que Path muestre una arista de la ruta aunque Dish
   esté apagado. RTWB aplica ahora `ShowDish || ShowPath || ShowMultiPath`; queda
   pendiente la validación visual junto con la corrección de los anillos.
+- Publicada la release estable `v0.7.0` sobre el commit
+  `597f670dd83af36929fa2b9ee2b1a2c8e80f0956`. El asset
+  `RemoteTechWormholeBridge-0.7.0.zip` contiene exclusivamente
+  `GameData/RemoteTechWormholeBridge`, incluye los dos DLL propios y tiene
+  SHA-256 `5509da3d331cd44df1494cf1e133dc24f7f63b7a7abd7997195c6a05426dda04`;
+  el archivo descargado desde GitHub coincidió byte a byte y pasó `unzip -t`.
