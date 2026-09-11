@@ -41,6 +41,8 @@
            Text="Missing RemoteTech reference under $(KspGameDataDir)." />
     <Error Condition=" !Exists('$(KspGameDataDir)/KopernicusExpansion/Plugins/KEX-Wormholes.dll') "
            Text="Missing KEX-Wormholes reference under $(KspGameDataDir)." />
+    <Error Condition=" !Exists('$(KspGameDataDir)/Kopernicus/Plugins/Kopernicus.dll') "
+           Text="Missing Kopernicus reference under $(KspGameDataDir)." />
     <Error Condition=" !Exists('$(KspGameDataDir)/000_Harmony/0Harmony.dll') "
            Text="Missing Harmony reference under $(KspGameDataDir)." />
     <Error Condition=" !Exists('$(KspGameDataDir)/RemoteTechOverhaul/Plugins/RemoteTechOverhaul.dll') "
@@ -70,6 +72,10 @@
       <HintPath>$(KspGameDataDir)/KopernicusExpansion/Plugins/KEX-Wormholes.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Kopernicus">
+      <HintPath>$(KspGameDataDir)/Kopernicus/Plugins/Kopernicus.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="0Harmony">
       <HintPath>$(KspGameDataDir)/000_Harmony/0Harmony.dll</HintPath>
       <Private>False</Private>
@@ -79,6 +85,8 @@
   <ItemGroup>
     <Compile Include="Bootstrap/DiagnosticController.cs" />
     <Compile Include="Bootstrap/HarmonyBootstrap.cs" />
+    <Compile Include="API/RTWBAPI.cs" />
+    <Compile Include="Contracts/ContractIntegrationStatus.cs" />
     <Compile Include="Core/AssemblyVersions.cs" />
     <Compile Include="Core/Log.cs" />
     <Compile Include="Diagnostics/OrbitSnapshot.cs" />
@@ -92,6 +100,24 @@
     <Compile Include="Properties/AssemblyInfo.cs" />
     <Compile Include="../RemoteTechWormholeBridge.Core/RegistryIssue.cs">
       <Link>Domain/RegistryIssue.cs</Link>
+    </Compile>
+    <Compile Include="../RemoteTechWormholeBridge.Core/Contracts/ContractEligibility.cs">
+      <Link>Domain/Contracts/ContractEligibility.cs</Link>
+    </Compile>
+    <Compile Include="../RemoteTechWormholeBridge.Core/Contracts/ContractLinkEvaluator.cs">
+      <Link>Domain/Contracts/ContractLinkEvaluator.cs</Link>
+    </Compile>
+    <Compile Include="../RemoteTechWormholeBridge.Core/Contracts/ContractRewardPolicy.cs">
+      <Link>Domain/Contracts/ContractRewardPolicy.cs</Link>
+    </Compile>
+    <Compile Include="../RemoteTechWormholeBridge.Core/Contracts/ContinuousServiceTimer.cs">
+      <Link>Domain/Contracts/ContinuousServiceTimer.cs</Link>
+    </Compile>
+    <Compile Include="../RemoteTechWormholeBridge.Core/Contracts/InterstellarTopology.cs">
+      <Link>Domain/Contracts/InterstellarTopology.cs</Link>
+    </Compile>
+    <Compile Include="../RemoteTechWormholeBridge.Core/Contracts/WormholePairId.cs">
+      <Link>Domain/Contracts/WormholePairId.cs</Link>
     </Compile>
     <Compile Include="../RemoteTechWormholeBridge.Core/Wormholes/WormholeBodyDescriptor.cs">
       <Link>Domain/Wormholes/WormholeBodyDescriptor.cs</Link>

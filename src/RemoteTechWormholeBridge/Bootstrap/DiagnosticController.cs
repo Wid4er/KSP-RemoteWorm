@@ -8,6 +8,7 @@ namespace RemoteTechWormholeBridge
     {
         private static bool refreshRequested;
         private bool supportedScene;
+        private bool rendererScene;
         private bool subscribed;
         private float nextPeriodicRefresh;
 
@@ -20,8 +21,11 @@ namespace RemoteTechWormholeBridge
 
         private IEnumerator Start()
         {
+            ContractIntegrationStatus.LogAvailabilityOnce();
             supportedScene = HighLogic.LoadedSceneIsFlight ||
-                             HighLogic.LoadedScene == GameScenes.TRACKSTATION;
+                             HighLogic.LoadedScene == GameScenes.TRACKSTATION ||
+                             HighLogic.LoadedScene == GameScenes.SPACECENTER &&
+                             ContractIntegrationStatus.IsAvailable;
             if (!supportedScene)
             {
                 enabled = false;
@@ -35,7 +39,10 @@ namespace RemoteTechWormholeBridge
 
             yield return new WaitForSeconds(1f);
             HarmonyBootstrap.EnsureNetworkPatched();
-            WormholeRenderManager.Attach();
+            rendererScene = HighLogic.LoadedSceneIsFlight ||
+                            HighLogic.LoadedScene == GameScenes.TRACKSTATION;
+            if (rendererScene)
+                WormholeRenderManager.Attach();
             Log.Info("mode=logical-link graphMutation=" + HarmonyBootstrap.IsNetworkPatched +
                      " renderer=" + WormholeRenderManager.IsAttached +
                      " scene=" + HighLogic.LoadedScene +
@@ -66,8 +73,9 @@ namespace RemoteTechWormholeBridge
             if (!supportedScene)
                 return;
 
-            WormholeRenderManager.Detach();
-            WormholeNetworkIntegration.Replace(null);
+            if (rendererScene)
+                WormholeRenderManager.Detach();
+            WormholeNetworkIntegration.Invalidate();
             if (!subscribed)
                 return;
 
@@ -99,7 +107,7 @@ namespace RemoteTechWormholeBridge
             }
             catch (System.Exception exception)
             {
-                WormholeNetworkIntegration.Replace(null);
+                WormholeNetworkIntegration.Invalidate();
                 Log.Error("diagnostic refresh failed reason=" + reason + " exception=" + exception);
             }
         }
@@ -108,7 +116,9 @@ namespace RemoteTechWormholeBridge
         {
             return HighLogic.LoadedScene == GameScenes.TRACKSTATION
                 ? "tracking-start"
-                : "flight-start";
+                : HighLogic.LoadedScene == GameScenes.SPACECENTER
+                    ? "space-center-start"
+                    : "flight-start";
         }
     }
 }

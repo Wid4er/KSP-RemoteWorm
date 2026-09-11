@@ -1,4 +1,4 @@
-RemoteTech Wormhole Bridge 0.6.0
+RemoteTech Wormhole Bridge 0.7.0
 
 RemoteTech Wormhole Bridge lets RemoteTech route signals through paired KEX
 wormholes. Relay placement bands adapt to each wormhole sphere of influence.
@@ -24,3 +24,7 @@ WormholeSignalBridge is not required.
 
 License: GNU General Public License v3.0 only.
 Source: https://github.com/Wid4er/KSP-RemoteWorm
+
+Optional:
+- Contract Configurator 2.13 or later enables one-time career milestones for
+  establishing stable links through each physical wormhole pair.

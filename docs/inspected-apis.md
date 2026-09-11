@@ -53,6 +53,9 @@ CelestialBody)`. No existe una API `TransformThroughWormhole`.
 
 - `RTCore.Instance.Satellites`, `.Antennas`, `.Network` y `.Renderer` son
   propiedades públicas.
+- `NetworkRenderer` expone los filtros booleanos `ShowDish`, `ShowPath`,
+  `ShowMultiPath` y `ShowCone`; RemoteTech 1.9.12 usa `ShowPath` antes del filtro
+  por tipo de antena cuando una arista pertenece a la ruta seleccionada.
 - `IAntenna` expone `Activated`, `Powered`, `CanTarget`, `Target`, `Dish`,
   `CosAngle`, `Omni` y `Guid`.
 - `ISatellite` expone `Guid`, `Position`, `Body`, `Powered`, `CanRelaySignal`,

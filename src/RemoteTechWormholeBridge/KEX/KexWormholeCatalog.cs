@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using KopernicusExpansion.Wormholes;
 using RemoteTechWormholeBridge.Core.Endpoints;
 using RemoteTechWormholeBridge.Core.Wormholes;
@@ -28,9 +29,16 @@ namespace RemoteTechWormholeBridge
         private static readonly WormholeRegistry Registry = new WormholeRegistry();
         private static readonly Dictionary<string, KexBodyInfo> Bodies =
             new Dictionary<string, KexBodyInfo>(StringComparer.Ordinal);
+        private static bool hasSnapshot;
+
+        internal static bool HasSnapshot
+        {
+            get { return hasSnapshot; }
+        }
 
         internal static void Refresh(string reason)
         {
+            hasSnapshot = true;
             Bodies.Clear();
             var descriptors = new List<WormholeBodyDescriptor>();
             List<CelestialBody> localBodies = PSystemManager.Instance == null
@@ -90,6 +98,23 @@ namespace RemoteTechWormholeBridge
 
             foreach (Core.RegistryIssue issue in Registry.Issues)
                 Log.Warning("wormhole-invalid subject=" + issue.Subject + " reason=" + issue.Message);
+        }
+
+        internal static void EnsureSnapshot(string reason)
+        {
+            if (!hasSnapshot)
+                Refresh(reason);
+        }
+
+        internal static IReadOnlyList<WormholePairDescriptor> SnapshotPairs()
+        {
+            return Registry.Pairs.ToList().AsReadOnly();
+        }
+
+        internal static bool TryGetInfo(string bodyId, out KexBodyInfo info)
+        {
+            info = null;
+            return bodyId != null && Bodies.TryGetValue(bodyId, out info);
         }
 
         internal static bool TryGetInfo(CelestialBody body, out KexBodyInfo info)

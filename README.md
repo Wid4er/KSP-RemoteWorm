@@ -9,7 +9,7 @@ Kopernicus Expansion (KEX) wormholes**. This lets you maintain communication
 networks across star systems without antennas that reach for light-years or
 impractically long interstellar signal delays.
 
-Current version: **0.6.0**.
+Current version: **0.7.0**.
 
 ## What it does
 
@@ -25,6 +25,11 @@ RTWB lets you:
 - retain RemoteTech remote control, routing, and signal delay;
 - see active links and potential coverage areas in the map view;
 - retarget antennas both in flight and from the Tracking Station.
+
+With the optional **Contract Configurator 2.13+** integration, career games can
+also offer a one-time milestone for each physical wormhole pair: deploy both
+gateways, establish the RTWB link, and keep the remote endpoint connected to
+the KSC for five consecutive Kerbin days.
 
 You do not need to pair two specific relays manually. RTWB discovers every
 compatible exit, and RemoteTech chooses the most suitable route for the origin
@@ -46,6 +51,10 @@ You need:
 to sending signals through KEX wormholes, adapted specifically for RemoteTech
 instead of CommNet/RealAntennas.
 
+**Contract Configurator 2.13 or later is optional.** Without it, RTWB loads and
+routes signals normally and no wormhole contracts are added. `Contract Pack:
+RemoteTech` is neither required nor used.
+
 ## Download and installation
 
 1. Download the ZIP from the
@@ -58,7 +67,8 @@ Kerbal Space Program/
 └── GameData/
     └── RemoteTechWormholeBridge/
         └── Plugins/
-            └── RemoteTechWormholeBridge.dll
+            ├── RemoteTechWormholeBridge.dll
+            └── RemoteTechWormholeBridge.Contracts.dll
 ```
 
 RemoteTech Overhaul must be installed separately at
@@ -88,9 +98,11 @@ lowest-cost complete route for each vessel.
 
 ## Visual indicators
 
-In map view or the Tracking Station, enable RemoteTech's dish and cone filters:
+In map view or the Tracking Station, enable RemoteTech's path (or dish) and cone
+filters:
 
-- **magenta lines** represent active wormhole links;
+- **magenta lines** represent active wormhole links and follow the path/dish
+  filters;
 - **magenta cones** show where a compatible relay could be placed;
 - the two **red rings** mark the inner and outer limits for the selected
   relay, even when it is currently outside the valid band;

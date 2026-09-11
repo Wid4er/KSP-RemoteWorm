@@ -45,6 +45,6 @@ namespace RemoteTechWormholeBridge
 
     internal static class PluginVersion
     {
-        internal const string Current = "0.6.0";
+        internal const string Current = "0.7.0";
     }
 }

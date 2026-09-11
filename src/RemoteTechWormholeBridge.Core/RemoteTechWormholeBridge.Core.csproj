@@ -27,6 +27,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="RegistryIssue.cs" />
+    <Compile Include="Contracts/ContractEligibility.cs" />
+    <Compile Include="Contracts/ContractLinkEvaluator.cs" />
+    <Compile Include="Contracts/ContractRewardPolicy.cs" />
+    <Compile Include="Contracts/ContinuousServiceTimer.cs" />
+    <Compile Include="Contracts/InterstellarTopology.cs" />
+    <Compile Include="Contracts/WormholePairId.cs" />
     <Compile Include="Wormholes/WormholeBodyDescriptor.cs" />
     <Compile Include="Wormholes/WormholePairDescriptor.cs" />
     <Compile Include="Wormholes/WormholeRegistry.cs" />

@@ -18,10 +18,15 @@ namespace RemoteTechWormholeBridge.PatchSmokeTests
             try
             {
                 Assembly plugin = typeof(ModuleRTWormholeBridge).Assembly;
+                Assert(plugin.GetReferencedAssemblies().All(reference =>
+                        reference.Name != "ContractConfigurator"),
+                    "the core RTWB plugin must load without Contract Configurator");
                 Type diagnostics = plugin.GetType(
                     "RemoteTechWormholeBridge.WormholeJumpDiagnostics", true);
                 Type controller = plugin.GetType(
                     "RemoteTechWormholeBridge.DiagnosticController", true);
+                Type renderer = plugin.GetType(
+                    "RemoteTechWormholeBridge.WormholeRenderManager", true);
                 Type graphPatch = plugin.GetType(
                     "RemoteTechWormholeBridge.NetworkGraphPatch", true);
                 Type pathPatch = plugin.GetType(
@@ -53,6 +58,22 @@ namespace RemoteTechWormholeBridge.PatchSmokeTests
                     "OnVesselSoiChanged", BindingFlags.Instance | BindingFlags.NonPublic);
                 Assert(soiHandler != null && !soiHandler.IsStatic,
                     "KSP EventData requires an instance SOI handler");
+
+                FieldInfo mapObjectBody = typeof(MapObject).GetField(
+                    "celestialBody", BindingFlags.Instance | BindingFlags.Public);
+                MethodInfo guideSelection = renderer.GetMethod(
+                    "SelectGuideEndpoint", BindingFlags.Static | BindingFlags.NonPublic,
+                    null, new[] { typeof(Vessel), typeof(CelestialBody), typeof(Vessel) }, null);
+                Assert(mapObjectBody != null && mapObjectBody.FieldType == typeof(CelestialBody),
+                    "focused wormhole rendering requires MapObject.celestialBody");
+                Assert(guideSelection != null,
+                    "guide-ring selection must accept the focused celestial body");
+
+                PropertyInfo showPath = typeof(NetworkRenderer).GetProperty("ShowPath");
+                PropertyInfo showMultiPath = typeof(NetworkRenderer).GetProperty("ShowMultiPath");
+                Assert(showPath != null && showPath.PropertyType == typeof(bool) &&
+                       showMultiPath != null && showMultiPath.PropertyType == typeof(bool),
+                    "bridge segments require RemoteTech path filter properties");
 
                 CustomAttributeData controllerAddon = controller.GetCustomAttributesData()
                     .Single(attribute => attribute.AttributeType == typeof(KSPAddon));

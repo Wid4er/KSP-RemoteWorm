@@ -62,6 +62,9 @@ seleccionada en el renderer.
 La selección de una nave consumidora también muestra los dos segmentos locales
 del puente concreto que aparece en alguna de sus rutas RemoteTech vigentes. Esto
 no equivale a `ACTIVE_BRIDGES`: otros puentes activos permanecen ocultos.
+Los segmentos siguen `ShowPath` y `ShowMultiPath`, además de `ShowDish`, tal
+como las aristas nativas de RemoteTech: activar la ruta debe bastar aunque el
+filtro general de discos esté desactivado.
 
 Al seleccionar directamente un relé aceptado, los conos se calculan de forma
 independiente de `RuntimeBridgeLink`: se muestran los de todos los endpoints
@@ -102,6 +105,11 @@ Cada círculo se aproxima mediante segmentos del mismo pool de `MapLineMesh`.
 Las tablas trigonométricas se crean una sola vez y los `GameObject` solo se
 añaden cuando el pool necesita crecer, no en cada frame. Su visibilidad sigue el
 filtro Cone de RemoteTech.
+
+La selección visual reconoce tanto `MapObject.vessel` como
+`MapObject.celestialBody`. Al enfocar directamente cualquiera de las bocas, el
+renderer elige un endpoint guía local para orientar sus anillos y mantiene las
+líneas y conos asociados al par. Esta selección es exclusivamente visual.
 
 ## Riesgos de renderizado
 

@@ -1,5 +1,7 @@
 using System;
 using System.Linq;
+using System.Collections.Generic;
+using RemoteTechWormholeBridge.Core.Contracts;
 using RemoteTechWormholeBridge.Core.Endpoints;
 using RemoteTechWormholeBridge.Core.Geometry;
 using RemoteTechWormholeBridge.Core.Routing;
@@ -29,6 +31,14 @@ namespace RemoteTechWormholeBridge.Core.Tests
                 ComputesIdentityCoverageInBothDirections();
                 RejectsCoverageOutsideEitherCone();
                 ClipsRenderedConeToOperationalRadii();
+                BuildsLinearInterstellarTopology();
+                UsesShortestAlternateTopologyRoute();
+                CreatesCanonicalPhysicalPairIds();
+                EvaluatesContractEligibility();
+                EvaluatesPairLinkObjectives();
+                RequiresContinuousStableService();
+                RestoresStableServiceTimer();
+                PreservesServiceAcrossRedundantEndpoints();
                 Console.WriteLine("RTWB core tests passed.");
                 return 0;
             }
@@ -37,6 +47,174 @@ namespace RemoteTechWormholeBridge.Core.Tests
                 Console.Error.WriteLine(exception);
                 return 1;
             }
+        }
+
+        private static void BuildsLinearInterstellarTopology()
+        {
+            InterstellarTopology topology = InterstellarTopology.Build("Kerbol", new[]
+            {
+                Edge("Kerbol-B", "Kerbol", "B"),
+                Edge("B-C", "B", "C"),
+                Edge("C-D", "C", "D")
+            });
+
+            Assert(topology.Depths["Kerbol"] == 0, "home system depth must be zero");
+            Assert(topology.Depths["B"] == 1, "B depth must be one");
+            Assert(topology.Depths["C"] == 2, "C depth must be two");
+            Assert(topology.Depths["D"] == 3, "D depth must be three");
+            Assert(topology.Tiers["Kerbol-B"] == 1, "Kerbol-B must be tier one");
+            Assert(topology.Tiers["B-C"] == 2, "B-C must be tier two");
+            Assert(topology.Tiers["C-D"] == 3, "C-D must be tier three");
+        }
+
+        private static void UsesShortestAlternateTopologyRoute()
+        {
+            InterstellarTopology topology = InterstellarTopology.Build("Kerbol", new[]
+            {
+                Edge("Kerbol-B", "Kerbol", "B"),
+                Edge("B-C", "B", "C"),
+                Edge("Kerbol-C", "Kerbol", "C")
+            });
+
+            Assert(topology.Depths["B"] == 1, "B must use its direct route");
+            Assert(topology.Depths["C"] == 1, "C must use the shortest alternate route");
+            Assert(topology.Tiers["B-C"] == 2,
+                "the physical B-C edge must retain a tier based on minimum endpoint depth");
+        }
+
+        private static void CreatesCanonicalPhysicalPairIds()
+        {
+            Assert(WormholePairId.Create("mouth-A", "mouth-B") ==
+                   WormholePairId.Create("mouth-B", "mouth-A"),
+                "pair IDs must be independent of discovery order");
+            Assert(WormholePairId.Create("mouth-A-2", "mouth-B-2") !=
+                   WormholePairId.Create("mouth-A-1", "mouth-B-1"),
+                "different physical mouths between the same systems must remain distinct");
+        }
+
+        private static void EvaluatesContractEligibility()
+        {
+            ContractEligibilityState state = EligibleState();
+            state.ParentAReached = false;
+            Assert(state.Evaluate() == ContractIneligibilityReason.NeitherParentReached,
+                "a pair with neither parent reached must not produce a contract");
+
+            state = EligibleState();
+            Assert(state.Evaluate() == ContractIneligibilityReason.None,
+                "reaching parent A must make an unlinked pair eligible");
+
+            state = EligibleState();
+            state.ParentAReached = false;
+            state.ParentBReached = true;
+            Assert(state.Evaluate() == ContractIneligibilityReason.None,
+                "reaching parent B first must also make an unlinked pair eligible");
+
+            state = EligibleState();
+            state.PairLinked = true;
+            Assert(state.Evaluate() == ContractIneligibilityReason.PairLinked,
+                "a currently linked pair must not be offered");
+
+            state = EligibleState();
+            state.HistoricallyCompleted = true;
+            Assert(state.Evaluate() == ContractIneligibilityReason.HistoricallyCompleted,
+                "a historically completed pair must not repeat");
+
+            state = EligibleState();
+            state.AlreadyOfferedOrActive = true;
+            Assert(state.Evaluate() == ContractIneligibilityReason.AlreadyOfferedOrActive,
+                "an offered or active pair must not duplicate");
+        }
+
+        private static void RequiresContinuousStableService()
+        {
+            const double day = 21600.0;
+            var timer = new ContinuousServiceTimer(5 * day);
+            Assert(timer.Update(100, true) == ServiceTimerTransition.Started,
+                "available service must start the timer");
+            timer.Update(100 + 4.9 * day, true);
+            Assert(!timer.IsComplete, "4.9 days must remain incomplete");
+            Assert(timer.Update(100 + 5 * day, true) == ServiceTimerTransition.Completed,
+                "five continuous days must complete");
+
+            timer = new ContinuousServiceTimer(5 * day);
+            timer.Update(100, true);
+            Assert(timer.Update(100 + 4 * day, false) == ServiceTimerTransition.Reset,
+                "loss of connectivity must reset the timer");
+            Assert(timer.Elapsed(100 + 4 * day) == 0, "a reset must discard prior service");
+            Assert(timer.Update(100 + 4 * day + 1, true) == ServiceTimerTransition.Started,
+                "restored service must begin again from zero");
+
+            timer = new ContinuousServiceTimer(5 * day);
+            timer.Update(100, true);
+            Assert(timer.Update(100 + 4 * day, false) == ServiceTimerTransition.Reset,
+                "loss of the RTWB link must use the same continuous-service reset");
+        }
+
+        private static void EvaluatesPairLinkObjectives()
+        {
+            var endpointAOnly = new[] { new ContractEndpointState("mouth-A", "vessel-A") };
+            Assert(ContractLinkEvaluator.HasGateway(endpointAOnly, "mouth-A"),
+                "one valid A endpoint must satisfy only gateway A");
+            Assert(!ContractLinkEvaluator.HasGateway(endpointAOnly, "mouth-B"),
+                "one valid A endpoint must leave gateway B incomplete");
+            Assert(!ContractLinkEvaluator.IsLinked(Enumerable.Empty<ContractActiveLinkState>()),
+                "endpoints without valid bidirectional geometry must not count as linked");
+
+            var active = new[]
+            {
+                new ContractActiveLinkState("mouth-A", "vessel-A", "mouth-B", "vessel-B")
+            };
+            Assert(ContractLinkEvaluator.IsLinked(active),
+                "an actual RTWB active-link snapshot must complete the link objective");
+            Assert(!ContractLinkEvaluator.HasRemoteKscService(
+                    active, "mouth-B", new HashSet<string> { "unrelated-vessel" }),
+                "KSC connectivity from an unrelated vessel must not count");
+            Assert(ContractLinkEvaluator.HasRemoteKscService(
+                    active, "mouth-B", new HashSet<string> { "vessel-B" }),
+                "the real B endpoint connected to KSC must provide service");
+        }
+
+        private static void PreservesServiceAcrossRedundantEndpoints()
+        {
+            var timer = new ContinuousServiceTimer(100);
+            timer.Update(0, true); // B1 supplies service.
+            timer.Update(50, true); // B2 takes over with no service gap.
+            Assert(timer.Elapsed(50) == 50,
+                "changing endpoints without losing service must preserve elapsed time");
+
+            Assert(timer.Update(60, false) == ServiceTimerTransition.Reset,
+                "an actual gap between redundant endpoints must reset elapsed time");
+        }
+
+        private static void RestoresStableServiceTimer()
+        {
+            var restored = new ContinuousServiceTimer(100);
+            restored.Restore(25, false);
+            Assert(restored.IsRunning && restored.Elapsed(75) == 50,
+                "a saved running timer must retain its original start time");
+            Assert(restored.Update(125, true) == ServiceTimerTransition.Completed,
+                "a restored timer must complete after the remaining continuous interval");
+
+            restored = new ContinuousServiceTimer(100);
+            restored.Restore(Double.NaN, true);
+            Assert(restored.IsComplete && restored.Elapsed(999) == 100,
+                "a completed saved timer must remain complete");
+        }
+
+        private static ContractEligibilityState EligibleState()
+        {
+            return new ContractEligibilityState
+            {
+                PairValid = true,
+                SystemsResolved = true,
+                RuntimeStateAvailable = true,
+                ParentAReached = true
+            };
+        }
+
+        private static WormholeTopologyEdge Edge(string pairId, string a, string b)
+        {
+            return new WormholeTopologyEdge(pairId, a, b);
         }
 
         private static void RegistersOneReciprocalPair()

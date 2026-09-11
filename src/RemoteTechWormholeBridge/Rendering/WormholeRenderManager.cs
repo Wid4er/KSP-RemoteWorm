@@ -75,9 +75,11 @@ namespace RemoteTechWormholeBridge
                 return;
             }
 
-            Vessel focused = MapView.MapCamera == null || MapView.MapCamera.target == null
+            MapObject focusedObject = MapView.MapCamera == null
                 ? null
-                : MapView.MapCamera.target.vessel;
+                : MapView.MapCamera.target;
+            Vessel focused = focusedObject == null ? null : focusedObject.vessel;
+            CelestialBody focusedBody = focusedObject == null ? null : focusedObject.celestialBody;
             Vessel active = FlightGlobals.ActiveVessel;
             if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
                 selectedRouteVessel = focused;
@@ -86,13 +88,15 @@ namespace RemoteTechWormholeBridge
             else if (focused != null)
                 selectedRouteVessel = focused;
 
-            if (focused == null && selectedRouteVessel == null)
+            if (focused == null && focusedBody == null && selectedRouteVessel == null)
             {
                 HideUnused(0);
                 return;
             }
 
-            bool showSegments = RTCore.Instance.Renderer.ShowDish;
+            bool showSegments = RTCore.Instance.Renderer.ShowDish ||
+                                RTCore.Instance.Renderer.ShowPath ||
+                                RTCore.Instance.Renderer.ShowMultiPath;
             bool showCones = RTCore.Instance.Renderer.ShowCone;
             int used = 0;
             int visibleLinks = 0;
@@ -105,7 +109,8 @@ namespace RemoteTechWormholeBridge
             string guideBody = "<none>";
             foreach (RuntimeBridgeLink link in WormholeNetworkIntegration.SnapshotVisualLinks())
             {
-                bool endpointSelected = IsEndpointSelected(link, focused);
+                bool endpointSelected = IsEndpointSelected(link, focused) ||
+                                        IsWormholeBodySelected(link, focusedBody);
                 bool routeSelected = !endpointSelected &&
                                      WormholeNetworkIntegration.IsUsedByRouteFrom(
                                          link,
@@ -134,7 +139,7 @@ namespace RemoteTechWormholeBridge
 
             }
 
-            Vessel coneOwner = SelectConeOwner(focused, selectedRouteVessel);
+            Vessel coneOwner = SelectConeOwner(focused, focusedBody, selectedRouteVessel);
             if (showCones && coneOwner != null)
             {
                 List<RuntimeEndpoint> endpoints = RemoteTechEndpointScanner.SnapshotAccepted();
@@ -167,7 +172,7 @@ namespace RemoteTechWormholeBridge
             }
 
             RuntimeEndpoint guideEndpoint = showCones
-                ? SelectGuideEndpoint(focused, selectedRouteVessel)
+                ? SelectGuideEndpoint(focused, focusedBody, selectedRouteVessel)
                 : null;
             if (guideEndpoint != null && DrawGuideRings(ref used, guideEndpoint))
             {
@@ -189,7 +194,7 @@ namespace RemoteTechWormholeBridge
                          " guideRings=" + renderedGuideRings +
                          " guideBody=" + guideBody +
                          " selection=" + (visibleFromRoute ? "route" : "endpoint") +
-                         " selected=" + SelectedName(focused, selectedRouteVessel) +
+                         " selected=" + SelectedName(focused, focusedBody, selectedRouteVessel) +
                          " coneSpan=inner-to-outer");
             }
         }
@@ -421,12 +426,34 @@ namespace RemoteTechWormholeBridge
                    (link.Target != null && link.Target.Vessel == selected);
         }
 
-        private static Vessel SelectConeOwner(Vessel focused, Vessel routeVessel)
+        private static bool IsWormholeBodySelected(RuntimeBridgeLink link, CelestialBody selected)
+        {
+            if (link == null || selected == null)
+                return false;
+
+            return HasWormholeBody(link.Source, selected) ||
+                   HasWormholeBody(link.Target, selected);
+        }
+
+        private static bool HasWormholeBody(RuntimeEndpoint endpoint, CelestialBody body)
+        {
+            return endpoint != null && endpoint.Wormhole != null &&
+                   endpoint.Wormhole.Body == body;
+        }
+
+        private static Vessel SelectConeOwner(
+            Vessel focused,
+            CelestialBody focusedBody,
+            Vessel routeVessel)
         {
             List<RuntimeEndpoint> endpoints = RemoteTechEndpointScanner.SnapshotAccepted();
             if (focused != null && endpoints.Exists(endpoint =>
                     endpoint != null && endpoint.Vessel == focused))
                 return focused;
+
+            RuntimeEndpoint bodyEndpoint = FindGuideForBody(endpoints, focusedBody);
+            if (bodyEndpoint != null)
+                return bodyEndpoint.Vessel;
 
             if (routeVessel != null && endpoints.Exists(endpoint =>
                     endpoint != null && endpoint.Vessel == routeVessel))
@@ -435,12 +462,19 @@ namespace RemoteTechWormholeBridge
             return null;
         }
 
-        private static RuntimeEndpoint SelectGuideEndpoint(Vessel focused, Vessel routeVessel)
+        private static RuntimeEndpoint SelectGuideEndpoint(
+            Vessel focused,
+            CelestialBody focusedBody,
+            Vessel routeVessel)
         {
             IReadOnlyList<RuntimeEndpoint> guides = RemoteTechEndpointScanner.Guides;
             RuntimeEndpoint focusedGuide = FindGuideForVessel(guides, focused);
             if (focusedGuide != null)
                 return focusedGuide;
+
+            RuntimeEndpoint bodyGuide = FindGuideForBody(guides, focusedBody);
+            if (bodyGuide != null)
+                return bodyGuide;
 
             return FindGuideForVessel(guides, routeVessel);
         }
@@ -462,6 +496,23 @@ namespace RemoteTechWormholeBridge
             return null;
         }
 
+        private static RuntimeEndpoint FindGuideForBody(
+            IReadOnlyList<RuntimeEndpoint> guides,
+            CelestialBody body)
+        {
+            if (guides == null || body == null)
+                return null;
+
+            for (int index = 0; index < guides.Count; ++index)
+            {
+                RuntimeEndpoint endpoint = guides[index];
+                if (HasWormholeBody(endpoint, body))
+                    return endpoint;
+            }
+
+            return null;
+        }
+
         private static bool IsInWormholePair(
             RuntimeEndpoint endpoint,
             RuntimeEndpoint ownerEndpoint,
@@ -477,10 +528,16 @@ namespace RemoteTechWormholeBridge
                    endpoint.Wormhole.Body == ownerPartner.Body;
         }
 
-        private static string SelectedName(Vessel focused, Vessel routeVessel)
+        private static string SelectedName(
+            Vessel focused,
+            CelestialBody focusedBody,
+            Vessel routeVessel)
         {
-            Vessel selected = focused ?? routeVessel;
-            return selected == null ? "<none>" : selected.vesselName;
+            if (focused != null)
+                return focused.vesselName;
+            if (focusedBody != null)
+                return focusedBody.name;
+            return routeVessel == null ? "<none>" : routeVessel.vesselName;
         }
 
         private static bool IsFinite(Vector3d value)

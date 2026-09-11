@@ -1,6 +1,25 @@
 # Changelog
 
-## Unreleased
+## 0.7.0 - 2026-09-11
+
+- Añade una integración opcional con Contract Configurator para contratos de
+  carrera únicos por cada par físico de agujeros KEX.
+- Expone una API RTWB de solo lectura para catálogo, endpoints y enlaces
+  operativos sin duplicar las reglas de validez existentes.
+- Calcula sistemas y tiers mediante la jerarquía multistar de Kopernicus y un
+  BFS topológico desde el sistema de Kerbin.
+- Exige cinco días Kerbin consecutivos de servicio desde un endpoint B real del
+  enlace hasta KSC, con continuidad entre gateways redundantes.
+- Conserva la no repetición mediante `CONTRACT_ALL` de Contract Configurator y
+  mantiene el DLL principal libre de referencias a esa dependencia opcional.
+- Permite que una misión aparezca al haber alcanzado el cuerpo padre de cualquiera
+  de las dos bocas, sin invertir la orientación topológica A → B del contrato.
+- Sustituye la flecha no soportada por la fuente de KSP en el título y amplía el
+  briefing con una guía breve para construir y alinear el enlace RTWB.
+- Muestra los anillos rojos de la banda operativa al enfocar cualquiera de las
+  bocas del par en el mapa, no sólo al seleccionar directamente su relé.
+- Hace que las líneas magenta del enlace respondan también a los filtros Path y
+  MultiPath, sin exigir que el filtro Dish permanezca activo.
 
 ## 0.6.0 - 2026-08-11
 

@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteTechWormholeBridge.Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteTechWormholeBridge", "src/RemoteTechWormholeBridge/RemoteTechWormholeBridge.csproj", "{E806D41B-E14A-4B69-B180-8B39D0DD610C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteTechWormholeBridge.Contracts", "src/RemoteTechWormholeBridge.Contracts/RemoteTechWormholeBridge.Contracts.csproj", "{FB0979F4-8B3F-4CB7-9F0B-89C5DCF00473}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteTechWormholeBridge.PatchSmokeTests", "tests/RemoteTechWormholeBridge.PatchSmokeTests/RemoteTechWormholeBridge.PatchSmokeTests.csproj", "{F698AA3A-9E48-4780-A8A0-59D3D87714E1}"
 EndProject
 Global
@@ -28,6 +30,10 @@ Global
 		{E806D41B-E14A-4B69-B180-8B39D0DD610C}.Debug|Any CPU.Build.0 = Debug|AnyCPU
 		{E806D41B-E14A-4B69-B180-8B39D0DD610C}.Release|Any CPU.ActiveCfg = Release|AnyCPU
 		{E806D41B-E14A-4B69-B180-8B39D0DD610C}.Release|Any CPU.Build.0 = Release|AnyCPU
+		{FB0979F4-8B3F-4CB7-9F0B-89C5DCF00473}.Debug|Any CPU.ActiveCfg = Debug|AnyCPU
+		{FB0979F4-8B3F-4CB7-9F0B-89C5DCF00473}.Debug|Any CPU.Build.0 = Debug|AnyCPU
+		{FB0979F4-8B3F-4CB7-9F0B-89C5DCF00473}.Release|Any CPU.ActiveCfg = Release|AnyCPU
+		{FB0979F4-8B3F-4CB7-9F0B-89C5DCF00473}.Release|Any CPU.Build.0 = Release|AnyCPU
 		{F698AA3A-9E48-4780-A8A0-59D3D87714E1}.Debug|Any CPU.ActiveCfg = Debug|AnyCPU
 		{F698AA3A-9E48-4780-A8A0-59D3D87714E1}.Debug|Any CPU.Build.0 = Debug|AnyCPU
 		{F698AA3A-9E48-4780-A8A0-59D3D87714E1}.Release|Any CPU.ActiveCfg = Release|AnyCPU

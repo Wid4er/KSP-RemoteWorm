@@ -39,6 +39,11 @@ Referencias usadas con copia local desactivada:
 - `RemoteTech/Plugins/RemoteTech.dll`;
 - `KopernicusExpansion/Plugins/KEX-Wormholes.dll`;
 - `000_Harmony/0Harmony.dll`.
+- `Kopernicus/Plugins/Kopernicus.dll`.
+
+El proyecto opcional `RemoteTechWormholeBridge.Contracts` usa además
+`ContractConfigurator/ContractConfigurator.dll` solo como referencia de
+compilación. Ninguna DLL externa se copia al paquete.
 
 RemoteTech 1.9.12 fue compilado para .NET Framework 4.5. WSB 2.0.0 usa net481.
 El plugin y el núcleo usan net48, validado contra la instalación KSP objetivo.
@@ -49,14 +54,19 @@ El plugin y el núcleo usan net48, validado contra la instalación KSP objetivo.
 2. Compila sin copiar DLL de terceros.
 3. Ejecuta las pruebas del núcleo.
 4. El smoke test verifica que Harmony acepta las firmas Prefix/Postfix/Finalizer.
-5. `pedump --verify all` valida el IL con las referencias objetivo disponibles.
-6. El paquete contiene únicamente archivos propios del mod.
+5. El mismo smoke test comprueba que el DLL principal no referencia Contract
+   Configurator.
+6. Una carga por reflexión aislada verifica que el DLL principal expone todos
+   sus tipos sin Contract Configurator presente.
+7. El paquete contiene únicamente archivos propios del mod.
 
 Salida generada:
 
 ```text
 build/GameData/RemoteTechWormholeBridge/
   Plugins/RemoteTechWormholeBridge.dll
+  Plugins/RemoteTechWormholeBridge.Contracts.dll
+  Contracts/InterstellarLink.cfg
   Patches/RemoteTechWormholeBridge.cfg
   Localization/
   RemoteTechWormholeBridge.version

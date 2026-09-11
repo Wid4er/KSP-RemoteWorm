@@ -59,6 +59,7 @@ las antenas proto de RemoteTech.
     conos aunque solo dos parejas estén alineadas. Cada cono usa dos aristas.
 12. Seleccionar una nave cuya ruta a KSC atraviese el puente. Deben permanecer
     visibles los dos segmentos locales magenta, pero no los conos de los relés.
+    Activar Path y desactivar Dish: los segmentos deben continuar visibles.
     Enfocar después el agujero o su sistema: los segmentos deben seguir visibles
     aunque el objetivo de la cámara ya no sea la nave.
 13. Entrar en Tracking Station, seleccionar una nave cuya ruta use el puente y
@@ -71,7 +72,7 @@ las antenas proto de RemoteTech.
 ## Resultado esperado
 
 ```text
-[RTWB] version plugin=0.6.0 ...
+[RTWB] version plugin=0.7.0 ...
 [RTWB] Harmony network patches applied updateGraph=UpdateGraph findPath=FindPath ...
 [RTWB] renderer-attached bridgeColor=#FF4FD8 guideColor=#FF3030 operationalBand=per-wormhole coneSpan=inner-to-outer guideRings=true ...
 [RTWB] mode=logical-link graphMutation=True renderer=True scene=FLIGHT|TRACKSTATION ...

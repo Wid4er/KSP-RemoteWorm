@@ -39,6 +39,7 @@ namespace RemoteTechWormholeBridge
             new HashSet<string>(StringComparer.Ordinal);
         private static readonly Dictionary<Guid, string> LastRouteStates =
             new Dictionary<Guid, string>();
+        private static bool runtimeSnapshotAvailable;
 
         [ThreadStatic]
         private static int pathfindingDepth;
@@ -49,6 +50,15 @@ namespace RemoteTechWormholeBridge
             {
                 lock (Sync)
                     return ActiveLinks.Count != 0;
+            }
+        }
+
+        internal static bool RuntimeSnapshotAvailable
+        {
+            get
+            {
+                lock (Sync)
+                    return runtimeSnapshotAvailable;
             }
         }
 
@@ -111,12 +121,26 @@ namespace RemoteTechWormholeBridge
 
             lock (Sync)
             {
+                runtimeSnapshotAvailable = true;
                 ActiveLinks.Clear();
                 foreach (KeyValuePair<string, RuntimeBridgeLink> entry in replacement)
                     ActiveLinks.Add(entry.Key, entry.Value);
 
                 LoggedInjections.RemoveWhere(key => !ActiveLinks.ContainsKey(key));
                 LoggedCosts.RemoveWhere(key => !ActiveLinks.ContainsKey(key));
+            }
+        }
+
+        internal static void Invalidate()
+        {
+            lock (Sync)
+            {
+                runtimeSnapshotAvailable = false;
+                ActiveLinks.Clear();
+                InjectedTargets.Clear();
+                LoggedInjections.Clear();
+                LoggedCosts.Clear();
+                LastRouteStates.Clear();
             }
         }
 

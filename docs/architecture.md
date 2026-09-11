@@ -104,6 +104,33 @@ inyector consume el registro validado y no recalcula geometría.
 - Fallo del renderer: se conserva el enlace lógico.
 - Fallo de inyección/coste: se eliminan datos visuales activos.
 
+## Contratos opcionales
+
+`RemoteTechWormholeBridge.dll` publica `RemoteTechWormholeBridge.API.RTWBAPI`,
+una API de solo lectura que devuelve snapshots del catálogo, endpoints y
+`RuntimeBridgeLink` activos. El cálculo de contratos consume esa API y no
+reimplementa la validez de antenas ni la geometría.
+
+La topología interestelar es un grafo independiente del estado operativo. Sus
+nodos son las estrellas anfitrionas devueltas por
+`KopernicusStar.GetLocalStar`; sus aristas son los pares físicos del catálogo.
+Un BFS desde la estrella de `HomeWorld` produce la profundidad mínima y el tier
+de cada par.
+
+`RemoteTechWormholeBridge.Contracts.dll` contiene exclusivamente la extensión
+para Contract Configurator: funciones de expresión, requisito de elegibilidad y
+parámetros de gateway, enlace y servicio estable. Declara
+`KSPAssemblyDependency` sobre Contract Configurator, por lo que KSP no lo añade
+a los assemblies cargados cuando falta esa dependencia. El DLL principal no
+referencia Contract Configurator.
+
+El `pairId` se guarda como `UNIQUE_DATA` con `CONTRACT_ALL`; Contract
+Configurator lo conserva también en contratos finalizados. El temporizador de
+cinco días guarda su UT inicial en el parámetro y se reinicia al perder el
+enlace o cuando ningún endpoint B activo tiene conexión RemoteTech con KSC.
+Cambiar entre endpoints B redundantes no altera el reloj mientras el servicio
+permanezca disponible.
+
 ## Decisiones aplazadas
 
 - UI y persistencia de ajustes globales;

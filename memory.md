@@ -70,8 +70,8 @@ Actualizado: 2026-08-11.
 - Implementada y validada dentro de KSP `0.4.0-render-test`: banda operativa
   inclusiva de 100-300 km desde la superficie de transición, dos segmentos
   locales magenta `#FF4FD8` y conos salientes magenta de 300 km.
-- El renderer propio se ejecuta en la cámara de mapa y respeta los filtros Dish
-  y Cone de RemoteTech. Muestra el puente del relé seleccionado o los segmentos
+- El renderer propio se ejecuta en la cámara de mapa y respeta los filtros Dish,
+  Path/MultiPath y Cone de RemoteTech. Muestra el puente del relé seleccionado o los segmentos
   del puente concreto usado por la ruta de la nave seleccionada; los conos siguen
   reservados para la selección directa de un relé.
 - Corregido antes de validar `0.4.0`: los vectores de `Orbit` deben convertirse
@@ -202,8 +202,8 @@ Actualizado: 2026-08-11.
 
 ## Siguiente trabajo
 
-1. Validar una instalación limpia del ZIP publicado `0.6.0` junto con
-   RemoteTech Overhaul `0.1.0`.
+1. Preparar commit, paquete y publicación de la integración de contratos cuando
+   el propietario lo solicite.
 
 ## Bloqueos/riesgos
 
@@ -230,3 +230,43 @@ Actualizado: 2026-08-11.
   `Wid4er/KSP-RemoteTechOverhaul`. La release estable RTWB `0.6.0` usa esa
   dependencia, reemplaza el aviso beta por documentación de instalación y se
   empaqueta únicamente bajo `GameData/RemoteTechWormholeBridge`.
+- La integración de contratos todavía no está publicada. El build local añade
+  `RemoteTechWormholeBridge.Contracts.dll`, condicionado mediante
+  `KSPAssemblyDependency` a Contract Configurator 2.x, mientras el DLL principal
+  no contiene ninguna referencia a Contract Configurator. Una carga aislada del
+  DLL principal sin CC enumera correctamente sus 79 tipos.
+- La API pública de solo lectura deriva pares y endpoints de los registros RTWB
+  existentes, y deriva enlaces de los `RuntimeBridgeLink` activos. La estrella
+  anfitriona usa `KopernicusStar.GetLocalStar`, cuya implementación instalada
+  recorre padres orbitales hasta `CelestialBody.isStar` cuando está activa la
+  lógica multistar; no usa distancia cartesiana ni SMA.
+- Las pruebas offline de contratos cubren ID canónico físico, BFS lineal y ruta
+  alternativa, tier, elegibilidad, gateway/link, endpoint B real, cinco días
+  continuos, reset, redundancia y restauración del reloj. Build Release, pruebas
+  core, smoke Harmony y parsing de los dos ConfigNode pasan; queda pendiente la
+  carga y generación real de Contract Configurator dentro de KSP.
+- La elegibilidad por progreso es bidireccional: basta con que `ProgressTracking`
+  marque alcanzado el cuerpo padre de A o el de B. La orientación A → B sigue
+  determinada por BFS y no cambia según el orden de visita.
+- Validado dentro de KSP que Contract Configurator carga la integración y ofrece
+  misiones tanto al alcanzar primero el lado A como al alcanzar primero el lado
+  B de dos pares distintos. El glifo Unicode de flecha del título no existe en
+  la fuente de esa interfaz; se reemplazó por un guion ASCII.
+- Validado dentro de KSP el título con separador ASCII y el briefing ampliado.
+  El usuario aceptó una misión, la completó mediante debug y confirmó que el
+  mismo par no vuelve a producirla, verificando la unicidad histórica por
+  `pairId`.
+- La integración completa de contratos quedó validada dentro de KSP por el
+  usuario: generación desde cualquiera de los dos lados, aceptación, objetivos
+  de gateways/enlace, servicio estable y finalización funcionaron correctamente.
+- Detectada una omisión visual del mod base: `WormholeRenderManager` sólo leía
+  `MapCamera.target.vessel`, por lo que enfocar el `MapObject` de la boca opuesta
+  conservaba las aristas magenta de la ruta pero no seleccionaba sus anillos
+  rojos. El log verificó un enlace `WH1R15`/`WH3V3` activo y sin excepciones; la
+  corrección para reconocer `target.celestialBody` queda pendiente de validación
+  visual dentro de KSP.
+- Detectado que los segmentos magenta dependían exclusivamente de `ShowDish`.
+  La API real de RemoteTech 1.9.12 expone `ShowPath` y `ShowMultiPath`, y su
+  renderer nativo permite que Path muestre una arista de la ruta aunque Dish
+  esté apagado. RTWB aplica ahora `ShowDish || ShowPath || ShowMultiPath`; queda
+  pendiente la validación visual junto con la corrección de los anillos.
